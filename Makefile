@@ -1,33 +1,40 @@
 SRCS_DIR=srcs
-INCLUDES_DIR=includes
+LIBFT_DIR=libft
 OBJS_DIR=objs
+INCLUDES_DIR=includes $(LIBFT_DIR)/includes
 
-SRCS=main.c
+SRCS=	main.c  \
+		ft_args_parser_fn.c
+
+LIBFT=$(LIBFT_DIR)/libft.a
+
 OBJS=$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.o))
-INCLUDES=$(addprefix -I, $(INCLUDES_DIR))
+HEADS=$(addprefix -I, $(INCLUDES_DIR))
 
 NAME=ft_ping
 
-CC=cc
+CC=gcc
 RM=rm -rf
 MKDIR=mkdir -p
-CFLAGS=-Wall -Werror -Wextra $(INCLUDES)
+
+CFLAGS=-Wall -Werror -Wextra
+
 DEBUG_FLAGS=-g3
 
 all: $(NAME)
-debug: CFLAGS+= $(DEBUG_FLAGS)
-debug: all
 clean:
 	$(RM) $(OBJS_DIR)
 fclean: clean
 	$(RM) $(NAME)
 re: fclean all
 
-$(NAME): $(OBJS)
-	$(CC) $(OBJS) -o $@
+$(NAME): $(LIBFT) $(OBJS)
+	$(CC) $(OBJS) $(LIBFT) -o $@
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(HEADS) -c $< -o $@
 $(OBJS_DIR):
 	$(MKDIR) $@
+$(LIBFT):
+	$(MAKE) -C $(LIBFT_DIR) all
 
-.PHONY: all clean fclean re debug
+.PHONY: all clean fclean re
