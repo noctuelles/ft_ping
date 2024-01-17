@@ -4,7 +4,8 @@ OBJS_DIR=objs
 INCLUDES_DIR=includes $(LIBFT_DIR)/includes
 
 SRCS=	main.c  \
-		ft_args_parser_fn.c
+		ft_args_parser_fn.c \
+		icmp.c
 
 LIBFT=$(LIBFT_DIR)/libft.a
 
@@ -19,7 +20,7 @@ MKDIR=mkdir -p
 
 CFLAGS=-Wall -Werror -Wextra
 
-DEBUG_FLAGS=-g3
+DEBUG_FLAGS=-g3 -fsanitize=address
 
 all: $(NAME)
 clean:
@@ -29,9 +30,9 @@ fclean: clean
 re: fclean all
 
 $(NAME): $(LIBFT) $(OBJS)
-	$(CC) $(OBJS) $(LIBFT) -o $@
+	$(CC) $(OBJS) $(LIBFT) $(DEBUG_FLAGS) -o $@
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
-	$(CC) $(CFLAGS) $(HEADS) -c $< -o $@
+	$(CC) $(CFLAGS) $(HEADS) $(DEBUG_FLAGS) -c $< -o $@
 $(OBJS_DIR):
 	$(MKDIR) $@
 $(LIBFT):
