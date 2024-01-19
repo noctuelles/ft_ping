@@ -5,7 +5,8 @@ INCLUDES_DIR=includes $(LIBFT_DIR)/includes
 
 SRCS=	main.c  \
 		ft_args_parser_fn.c \
-		icmp.c
+		icmp.c \
+		translation.c
 
 LIBFT=$(LIBFT_DIR)/libft.a
 
@@ -20,7 +21,7 @@ MKDIR=mkdir -p
 
 CFLAGS=-Wall -Werror -Wextra
 
-DEBUG_FLAGS=-g3 -fsanitize=address
+DEBUG_FLAGS=-g3
 
 all: $(NAME)
 clean:
