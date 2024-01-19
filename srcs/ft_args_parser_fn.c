@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 20:46:17 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/17 17:28:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/19 15:35:45 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,20 @@ parse_help(const char *argument, t_args_parser_state *parser_state, void *input)
     (void)parser_state;
 
     TOGGLE_OPTION(ft_ping->option_flags, FT_PING_OPTION_HELP);
+
+    return (0);
+}
+
+int
+parse_timeout(const char *argument, t_args_parser_state *parser_state, void *input) {
+    t_ft_ping *ft_ping = (t_ft_ping *)input;
+
+    if (!match_integer(argument)) {
+        parser_state->error_message = "argument must be an integer";
+        return (-1);
+    }
+
+    ft_ping->options_value.timeout = ft_atoi(argument);
 
     return (0);
 }

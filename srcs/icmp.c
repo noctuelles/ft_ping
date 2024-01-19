@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 16:15:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/17 17:56:21 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/19 17:11:27 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ icmp_payload_checksum(void *payload, size_t payload_size) {
  */
 int
 prepare_icmp_packet(t_icmp_packet *icmp_packet, uint8_t data_pattern[16], size_t data_size) {
+    static size_t sequence_number = 0;
+
     if ((icmp_packet->payload = allocate_icmp_packet_payload(data_size)) == NULL) {
         return (-1);
     }
@@ -96,7 +98,7 @@ prepare_icmp_packet(t_icmp_packet *icmp_packet, uint8_t data_pattern[16], size_t
     header->code            = ICMP_CODE_ECHO_REQUEST;
     header->checksum        = 0;
     header->identifier      = (uint16_t)getpid();
-    header->sequence_number = 0;
+    header->sequence_number = sequence_number++;
 
     fill_icmp_packet_data(icmp_packet->data, data_pattern, data_size);
 
