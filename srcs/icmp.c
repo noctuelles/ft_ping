@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 16:15:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/19 17:11:27 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/20 14:16:18 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,14 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "ft_ping.h"
 #include "libft.h"
 
 static void
-fill_icmp_packet_data_custom(void *data, uint8_t data_pattern[16], size_t data_size) {
+fill_icmp_packet_data_custom(void *data, t_data_pattern *data_pattern, size_t data_size) {
     for (size_t i = 0; i < data_size; i++) {
         if (data_pattern != NULL) {
-            ((char *)data)[i] = data_pattern[i % 16];
+            ((char *)data)[i] = data_pattern->pattern[i % data_pattern->pattern_size];
         } else {
             ((char *)data)[i] = i % 256;
         }
@@ -30,7 +31,7 @@ fill_icmp_packet_data_custom(void *data, uint8_t data_pattern[16], size_t data_s
 }
 
 static void
-fill_icmp_packet_data(void *data, uint8_t data_pattern[16], size_t data_size) {
+fill_icmp_packet_data(void *data, t_data_pattern *data_pattern, size_t data_size) {
     if (data_size >= sizeof(struct timeval)) {
         (void)gettimeofday((struct timeval *)data, NULL);
 
@@ -81,7 +82,7 @@ icmp_payload_checksum(void *payload, size_t payload_size) {
  * freed by the caller.
  */
 int
-prepare_icmp_packet(t_icmp_packet *icmp_packet, uint8_t data_pattern[16], size_t data_size) {
+prepare_icmp_packet(t_icmp_packet *icmp_packet, t_data_pattern *data_pattern, size_t data_size) {
     static size_t sequence_number = 0;
 
     if ((icmp_packet->payload = allocate_icmp_packet_payload(data_size)) == NULL) {

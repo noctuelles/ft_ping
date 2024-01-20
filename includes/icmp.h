@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 15:11:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/17 17:45:40 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/20 14:16:58 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
+#include "ft_ping.h"
 
 #define ICMP_ECHO_REQUEST 8
 #define ICMP_CODE_ECHO_REQUEST 0
@@ -47,6 +49,6 @@ typedef struct s_icmp_packet {
     size_t data_size;
 } t_icmp_packet;
 
-int prepare_icmp_packet(t_icmp_packet *icmp_packet, uint8_t data_pattern[16], size_t data_size);
+int prepare_icmp_packet(t_icmp_packet *icmp_packet, t_data_pattern *data_pattern, size_t data_size);
 
 #endif

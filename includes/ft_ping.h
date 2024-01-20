@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/19 16:51:35 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/20 15:01:52 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,25 @@
 
 #define DEFAULT_PACKET_DATA_SIZE 56
 
+typedef struct s_data_pattern {
+    uint8_t *pattern;
+    size_t   pattern_size;
+} t_data_pattern;
+
 typedef struct s_ft_ping {
     uint32_t option_flags;
     struct {
-        size_t stop_until_nbr_packets;
-        size_t packet_data_size;
-        size_t preload_nbr_packets;
-        time_t timeout;
+        size_t         stop_until_nbr_packets;
+        size_t         packet_data_size;
+        size_t         packet_time_to_live;
+        size_t         preload_nbr_packets;
+        time_t         timeout;
+        t_data_pattern data_pattern;
     } options_value;
     const char *target;
     t_socket    socket;
 } t_ft_ping;
+
+extern t_ft_ping g_ft_ping;
 
 #endif  // FT_PING_H

@@ -3,8 +3,14 @@ LIBFT_DIR=libft
 OBJS_DIR=objs
 INCLUDES_DIR=includes $(LIBFT_DIR)/includes
 
-SRCS=	main.c  \
-		ft_args_parser_fn.c \
+SRCS=	parsing/opts/count.c \
+		parsing/opts/data_pattern.c \
+		parsing/opts/help.c \
+		parsing/opts/packet_size.c \
+		parsing/opts/preload.c \
+		parsing/opts/timeout.c \
+		parsing/opts/argument.c \
+		main.c  \
 		icmp.c \
 		translation.c
 
@@ -32,10 +38,9 @@ re: fclean all
 
 $(NAME): $(LIBFT) $(OBJS)
 	$(CC) $(OBJS) $(LIBFT) $(DEBUG_FLAGS) -o $@
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(HEADS) $(DEBUG_FLAGS) -c $< -o $@
-$(OBJS_DIR):
-	$(MKDIR) $@
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR) all
 
