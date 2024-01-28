@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/19 16:00:16 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/19 22:26:13 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/27 14:45:54 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include "libft.h"
+
 static struct addrinfo *
 ipv4_icmp_getaddrinfo(const char *node) {
     struct addrinfo  hints = {0};
@@ -28,38 +30,33 @@ ipv4_icmp_getaddrinfo(const char *node) {
     hints.ai_family   = AF_INET;
     hints.ai_socktype = SOCK_RAW;
     hints.ai_protocol = IPPROTO_ICMP;
-
-    error = getaddrinfo(node, NULL, &hints, &res);
+    error             = getaddrinfo(node, NULL, &hints, &res);
     if (error != 0) {
         fprintf(stderr, "ft_ping: %s\n", gai_strerror(error));
         return (NULL);
     }
-
     return (res);
 }
 
 static int
-get_socket_from_addrinfo_list(struct addrinfo *res, t_socket *psocket) {
+get_socket_from_addrinfo_list(struct addrinfo *res, struct sockaddr_in *sockaddr) {
     int fd = -1;
 
     for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
         fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (fd != -1) {
-            psocket->fd       = fd;
-            psocket->addrinfo = *rp;
+            ft_memcpy(sockaddr, rp->ai_addr, rp->ai_addrlen);
             break;
         }
     }
-
     if (fd == -1) {
         fprintf(stderr, "ft_ping: %s\n", strerror(errno));
     }
-
     return (fd);
 }
 
 int
-get_socket_from_node(const char *node, t_socket *socket) {
+get_socket_from_node(const char *node, struct sockaddr_in *sockaddr) {
     struct addrinfo *res = NULL;
     int              fd  = -1;
 
@@ -67,12 +64,8 @@ get_socket_from_node(const char *node, t_socket *socket) {
     if (res == NULL) {
         return (-1);
     }
-
-    fd = get_socket_from_addrinfo_list(res, socket);
-    (void)inet_ntop(AF_INET, &((struct sockaddr_in *)&socket->addrinfo.ai_addr)->sin_addr, socket->presentation,
-                    INET_ADDRSTRLEN);
+    fd = get_socket_from_addrinfo_list(res, sockaddr);
 
     freeaddrinfo(res);
-
     return (fd);
 }

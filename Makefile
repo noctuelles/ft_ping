@@ -3,15 +3,31 @@ LIBFT_DIR=libft
 OBJS_DIR=objs
 INCLUDES_DIR=includes $(LIBFT_DIR)/includes
 
-SRCS=	parsing/opts/count.c \
-		parsing/opts/data_pattern.c \
-		parsing/opts/help.c \
-		parsing/opts/packet_size.c \
-		parsing/opts/preload.c \
-		parsing/opts/timeout.c \
+SRCS=\
+		parsing/opts/general/count.c \
+		parsing/opts/general/debug.c \
+		parsing/opts/general/ignore_routing.c \
+		parsing/opts/general/interval.c \
+		parsing/opts/general/linger.c \
+		parsing/opts/general/numeric.c \
+		parsing/opts/general/time_to_live.c \
+		parsing/opts/general/timeout.c \
+		parsing/opts/general/type_of_service.c \
+		parsing/opts/general/verbose.c \
+		parsing/opts/echo/data_pattern.c \
+		parsing/opts/echo/flood.c \
+		parsing/opts/echo/ip_timestamp.c \
+		parsing/opts/echo/preload.c \
+		parsing/opts/echo/quiet.c \
+		parsing/opts/echo/route.c \
+		parsing/opts/echo/size.c \
 		parsing/opts/argument.c \
+		parsing/opts/help.c \
 		main.c  \
 		icmp.c \
+		routine.c \
+		checksum.c \
+		output.c \
 		translation.c
 
 LIBFT=$(LIBFT_DIR)/libft.a
@@ -25,7 +41,7 @@ CC=gcc
 RM=rm -rf
 MKDIR=mkdir -p
 
-CFLAGS=-Wall -Werror -Wextra
+CFLAGS=-Wall -Werror -Wextra -Wpedantic
 
 DEBUG_FLAGS=-g3
 

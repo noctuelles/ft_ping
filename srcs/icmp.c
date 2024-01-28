@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 16:15:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/22 00:50:02 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/27 15:25:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,18 @@
 #include "ft_ping.h"
 #include "libft.h"
 
-static void
-fill_icmp_echo_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern *data_pattern, size_t data_size) {
-    if (data_size >= sizeof(struct timeval)) {
+void
+fill_icmp_echo_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern *data_pattern,
+                           size_t packet_data_size) {
+    if (packet_data_size >= sizeof(struct timeval)) {
         (void)gettimeofday((struct timeval *)icmp_echo_packet_data, NULL);
 
         icmp_echo_packet_data += sizeof(struct timeval);
-        data_size -= sizeof(struct timeval);
+        packet_data_size -= sizeof(struct timeval);
     }
 
-    for (size_t i = 0; i < data_size; i++) {
-        if (data_pattern != NULL) {
+    for (size_t i = 0; i < packet_data_size; i++) {
+        if (data_pattern->pattern_size > 0) {
             icmp_echo_packet_data[i] = data_pattern->pattern[i % data_pattern->pattern_size];
         } else {
             icmp_echo_packet_data[i] = i % 256;
@@ -39,46 +40,60 @@ fill_icmp_echo_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern 
     }
 }
 
-static void *
-allocate_icmp_packet(size_t data_size) {
-    struct icmp *icmp_packet;
+/**
+ * @brief This function decode an incoming datagram returned by the kernel. If successfull, rip and ricmp value are
+ * updated to the start of the IP Header and the ICMP Header respectively.
+ *
+ * @param buffer
+ * @param buffer_size
+ * @param rip value-return argument.
+ * @param ricmp value-return argument.
+ * @return int 0: the function sucessfully parsed the datagram. -1 : the packet is too short, 1 : the checksum doesn't
+ * match.
+ */
+int
+icmp_packet_decode(uint8_t *buffer, size_t buffer_size, struct ip **rip, struct icmp **ricmp) {
+    struct ip   *ip               = NULL;
+    struct icmp *icmp             = NULL;
+    size_t       ip_header_len    = 0;
+    size_t       icmp_payload_len = 0;
+    uint16_t     saved_cksum      = 0;
 
-    if ((icmp_packet = malloc(sizeof(struct icmphdr) + data_size) == NULL)) {
-        return (NULL);
+    ip               = (struct ip *)buffer;
+    ip_header_len    = ip->ip_hl << 2U;
+    icmp_payload_len = ntohs(ip->ip_len) - ip_header_len;
+    if (buffer_size < ip_header_len + ICMP_MINLEN) {
+        return (-1);
     }
-
-    return icmp_packet;
+    icmp             = (struct icmp *)(buffer + ip_header_len);
+    saved_cksum      = icmp->icmp_cksum;
+    icmp->icmp_cksum = 0;
+    icmp->icmp_cksum = icmp_checksum(icmp, icmp_payload_len);
+    if (icmp->icmp_cksum != saved_cksum) {
+        return (1);
+    }
+    icmp->icmp_cksum = saved_cksum;
+    *rip             = ip;
+    *ricmp           = icmp;
+    return (0);
 }
 
-/**
- * Prepare an ICMP ECHO REQUEST packet by filling the ICMP header and the optional data.
- *
- * @param data_pattern is the pattern that will be used to fill the optional data. If NULL, the optional data will be
- * filled with a sequence of bytes from 0 to 255.
- * @param seq is the sequence number of the packet.
- * @param data_size is the size of the optional data. If >= sizeof(struct timeval), the optional data will contain the
- * current time and then the custom data.
- *
- * @return the allocated icmp echo packet or NULL on failure.
- */
-struct icmp *
-prepare_icmp_echo_packet(const t_data_pattern *data_pattern, uint16_t seq, size_t data_size) {
-    struct icmp    *icmp_echo_packet = NULL;
-    static uint16_t seq              = 0;
+void
+fill_icmp_echo_packet_header(struct icmphdr *icmp_echo_packet_header, uint16_t sequence_number, uint16_t sequence_id) {
+    icmp_echo_packet_header->type             = ICMP_ECHO;
+    icmp_echo_packet_header->code             = 0;
+    icmp_echo_packet_header->un.echo.id       = htons(sequence_id);
+    icmp_echo_packet_header->un.echo.sequence = htons(sequence_number);
+    icmp_echo_packet_header->checksum         = 0;
+}
 
-    if ((icmp_echo_packet = malloc(sizeof(struct icmphdr) + data_size) == NULL)) {
+struct icmp *
+allocate_icmp_echo_packet(size_t packet_data_size) {
+    struct icmp *icmp_echo_packet;
+
+    if ((icmp_echo_packet = malloc(ICMP_ECHO_PACKET_SIZE(packet_data_size))) == NULL) {
         return (NULL);
     }
-
-    icmp_echo_packet->icmp_type                 = ICMP_ECHO;
-    icmp_echo_packet->icmp_code                 = 0;
-    icmp_echo_packet->icmp_cksum                = 0;
-    icmp_echo_packet->icmp_hun.ih_idseq.icd_id  = getpid() & 0xFFFFu;
-    icmp_echo_packet->icmp_hun.ih_idseq.icd_seq = seq;
-
-    fill_icmp_echo_packet_data(icmp_echo_packet->icmp_dun.id_data, data_pattern, data_size);
-
-    icmp_echo_packet->icmp_cksum = internet_checksum(icmp_echo_packet, sizeof(struct icmphdr) + data_size);
 
     return (icmp_echo_packet);
 }
