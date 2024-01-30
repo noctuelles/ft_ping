@@ -23,6 +23,7 @@ SRCS=\
 		parsing/opts/echo/size.c \
 		parsing/opts/argument.c \
 		parsing/opts/help.c \
+		io/utils.c \
 		main.c  \
 		icmp.c \
 		routine.c \
