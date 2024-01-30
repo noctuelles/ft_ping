@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/19 16:00:16 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 05:25:16 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 08:33:58 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "io/utils.h"
 #include "libft.h"
 
 static struct addrinfo *

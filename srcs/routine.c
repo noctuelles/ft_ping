@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 05:22:46 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 08:32:00 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 #include "checksum.h"
 #include "ft_ping.h"
 #include "icmp.h"
-#include "io/utils.h"
 #include "libft.h"
 #include "output.h"
 
