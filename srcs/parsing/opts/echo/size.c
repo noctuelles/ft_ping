@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 14:47:54 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:20:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 04:19:14 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #define IP_HMINLEN 20
 
 int
-parse_packet_size(char *argument, t_args_parser_state *parser_state, void *input) {
+parse_size(char *argument, t_args_parser_state *parser_state, void *input) {
     t_ft_ping *ft_ping = (t_ft_ping *)input;
 
     if (!ft_strmatch_int(argument)) {

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:03:17 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 04:58:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "ft_args_parser.h"
@@ -118,7 +119,7 @@ static t_args_parser_option_entry g_parser_entries[MAX_PARSER_ENTRIES] = {
      .long_key                      = "size",
      .argument                      = true,
      .long_key_argument_description = "NUMBER",
-     .parse_fn                      = parse_packet_size,
+     .parse_fn                      = parse_size,
      .description                   = "send NUMBER data octets"},
 
     {.short_key                     = "p",
@@ -155,16 +156,19 @@ int
 main(int argc, char **argv) {
     t_ft_ping        ft_ping = {0};
     struct sigaction sigact  = {0};
+    struct sigevent  sigev   = {0};
 
-    sigact.sa_handler = sighandler;
+    sigact.sa_handler  = sighandler;
+    sigev.sigev_notify = SIGEV_SIGNAL;
+    sigev.sigev_signo  = SIGALRM;
     (void)sigaction(SIGALRM, &sigact, NULL);
     (void)sigaction(SIGINT, &sigact, NULL);
 
-    ft_ping.options_value.packet_data_size        = DEFAULT_PACKET_DATA_SIZE;
+    ft_ping.options_value.packet_data_size         = DEFAULT_PACKET_DATA_SIZE;
     ft_ping.options_value.interval_between_packets = DEFAULT_INTERVAL_BETWEEN_PACKET;
-    ft_ping.options_value.preload_nbr_packets     = DEFAULT_PRELOAD_NBR_PACKETS;
-    ft_ping.sock_len                              = sizeof(struct sockaddr_in);
-    ft_ping.seq.id                                = (uint16_t)(getpid() & 0xFFFFU);
+    ft_ping.options_value.preload_nbr_packets      = DEFAULT_PRELOAD_NBR_PACKETS;
+    ft_ping.sock_len                               = sizeof(struct sockaddr_in);
+    ft_ping.seq.id                                 = (uint16_t)(getpid() & 0xFFFFU);
 
     g_args_parser_config.input = &ft_ping;
     g_args_parser_config.argc  = argc;
@@ -178,13 +182,13 @@ main(int argc, char **argv) {
     if (ft_ping.hostsock_fd == -1) {
         return (1);
     }
-    if (HAS_OPT(&ft_ping, OPT_PACKET_TIME_TO_LIVE)) {
+    if (HAS_OPT(&ft_ping, OPT_TIME_TO_LIVE)) {
         uint8_t ttl = (uint8_t)ft_ping.options_value.packet_time_to_live;
 
         (void)setsockopt(ft_ping.hostsock_fd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
     }
-
     (void)inet_ntop(AF_INET, &ft_ping.hostsock_addr.sin_addr, ft_ping.p_inet_addr, INET_ADDRSTRLEN);
+    (void)timer_create(CLOCK_MONOTONIC, &sigev, &ft_ping.timer_id);
 
     ping_routine(&ft_ping);
 

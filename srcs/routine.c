@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 10:32:07 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 05:22:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,21 +19,28 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "checksum.h"
 #include "ft_ping.h"
 #include "icmp.h"
+#include "io/utils.h"
 #include "libft.h"
 #include "output.h"
 
 static ssize_t
 sendto_w(const t_ft_ping *ft_ping, const struct icmp *icmp_packet, size_t packet_size) {
-    ssize_t ret;
+    ssize_t ret   = 0;
+    int     flags = 0;
 
-    if ((ret = sendto(ft_ping->hostsock_fd, icmp_packet, packet_size, MSG_NOSIGNAL,
-                      (struct sockaddr *)&ft_ping->hostsock_addr, ft_ping->sock_len)) == -1) {
-        fprintf(stderr, "ft_ping: sendto: %s\n", strerror(errno));
+    flags = MSG_NOSIGNAL;
+    if (HAS_OPT(ft_ping, OPT_IGNORE_ROUTING)) {
+        flags |= MSG_DONTROUTE;
+    }
+    if ((ret = sendto(ft_ping->hostsock_fd, icmp_packet, packet_size, flags, (struct sockaddr *)&ft_ping->hostsock_addr,
+                      ft_ping->sock_len)) == -1) {
+        ft_error(0, errno, "sending packet");
     }
 
     return ret;
@@ -60,7 +67,10 @@ send_packet(t_ft_ping *ft_ping, struct icmp *icmp_echo_packet) {
 }
 
 void
-icmp_echo_handler(const struct ip *ip, const struct icmp *imcp) {}
+icmp_echo_handler(const struct ip *ip, const struct icmp *icmp) {
+    (void)ip;
+    (void)icmp;
+}
 
 void
 on_recv(t_ft_ping *ft_ping, uint8_t *buffer, size_t buffer_size) {
@@ -95,14 +105,15 @@ on_recv(t_ft_ping *ft_ping, uint8_t *buffer, size_t buffer_size) {
 }
 
 void
-echo() {}
+on_interrupt() {}
 
 void
 ping_routine(t_ft_ping *ft_ping) {
-    struct icmp  *icmp_echo_packet;
-    ssize_t       bytes_received = 0;
-    struct msghdr msg            = {0};
-    uint8_t       recv_buffer[IP_MAXPACKET];
+    struct icmp      *icmp_echo_packet;
+    ssize_t           bytes_received            = 0;
+    struct msghdr     msg                       = {0};
+    struct itimerspec timer                     = {0};
+    uint8_t           recv_buffer[IP_MAXPACKET] = {0};
 
     if ((icmp_echo_packet = allocate_icmp_echo_packet(ft_ping->options_value.packet_data_size)) == NULL) {
         return;
@@ -121,27 +132,33 @@ ping_routine(t_ft_ping *ft_ping) {
         }
     }
 
+    timer.it_value.tv_sec    = ft_ping->options_value.interval_between_packets;
+    timer.it_interval.tv_sec = ft_ping->options_value.interval_between_packets;
+
+    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+        timer.it_value.tv_nsec    = FLOOD_BASE_INTERVAL;
+        timer.it_interval.tv_nsec = FLOOD_BASE_INTERVAL;
+    }
+
+    timer_settime(ft_ping->timer_id, 0, &timer, NULL);
+
     while (g_ping_state != END_PROGRAM) {
-        g_ping_state = RECV_MSG;
-
-        alarm(ft_ping->options_value.interval_between_packets);
-
         bytes_received = recvmsg(ft_ping->hostsock_fd, &msg, 0);
-
         if (bytes_received == -1) {
-            if (errno == EINTR) {
-                if (g_ping_state == SEND_MSG) {
-                    if (send_packet(ft_ping, icmp_echo_packet) == -1) {
-                        return;
-                    }
-
-                    (void)alarm(ft_ping->options_value.interval_between_packets);
-                }
+            if (errno != EINTR) {
+                ft_error(0, errno, "cannot receive");
+                g_ping_state = END_PROGRAM;
             } else {
-                fprintf(stderr, "ft_ping: recvmsg: %s\n", strerror(errno));
+                if (g_ping_state == SEND_MSG) {
+                    send_packet(ft_ping, icmp_echo_packet);
+                    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+                        ft_putchar('.');
+                    }
+                    g_ping_state = RECV_MSG;
+                }
             }
         } else {
-            on_recv(ft_ping, recv_buffer, bytes_received);
+            on_recv(ft_ping, recv_buffer, (size_t)bytes_received);
         }
     }
 }

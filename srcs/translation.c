@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/19 16:00:16 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/27 14:45:54 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 05:25:16 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include "io/utils.h"
 #include "libft.h"
 
 static struct addrinfo *
@@ -32,7 +33,7 @@ ipv4_icmp_getaddrinfo(const char *node) {
     hints.ai_protocol = IPPROTO_ICMP;
     error             = getaddrinfo(node, NULL, &hints, &res);
     if (error != 0) {
-        fprintf(stderr, "ft_ping: %s\n", gai_strerror(error));
+        ft_error(0, 0, "cannot resolve node: %s", gai_strerror(error));
         return (NULL);
     }
     return (res);
@@ -50,7 +51,7 @@ get_socket_from_addrinfo_list(struct addrinfo *res, struct sockaddr_in *sockaddr
         }
     }
     if (fd == -1) {
-        fprintf(stderr, "ft_ping: %s\n", strerror(errno));
+        ft_error(0, errno, "cannot create socket");
     }
     return (fd);
 }

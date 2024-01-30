@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 22:05:14 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 02:23:54 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 05:10:22 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,11 @@ print_introduction(const t_ft_ping *ft_ping) {
 
 void
 print_echo(const t_ft_ping *ft_ping, const struct ip *ip, const struct icmp *icmp, bool dup) {
+    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+        ft_putchar('\b');
+        return;
+    }
+
     printf("%u bytes from %s: icmp_seq=%u ttl=%u", (uint16_t)(ntohs(ip->ip_len) - (ip->ip_hl << 2U)),
            ft_ping->p_inet_addr, ntohs(icmp->icmp_hun.ih_idseq.icd_seq), ip->ip_ttl);
     if (dup) {

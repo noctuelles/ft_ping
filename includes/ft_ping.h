@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:07:13 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 05:09:26 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include "translation.h"
 
 #define TOGGLE_OPT(ft_ping, option) ((ft_ping)->option_flags ^= option)
-#define HAS_OPT(ft_ping, option) ((ft_ping)->option_flags & option)
+#define HAS_OPT(ft_ping, option) ((ft_ping)->option_flags & (option))
 
 #define CHK_SEQ_NBR(ft_ping, nbr) ((ft_ping)->seq_nbr_chk[nbr / 8] & (1U << nbr % 8))
 #define SET_SEQ_NBR(ft_ping, nbr) ((ft_ping)->seq_nbr_chk[nbr / 8] ^= (1U << nbr % 8))
@@ -44,10 +44,12 @@
 #define OPT_QUIET 0x4000
 #define OPT_ROUTE 0x8000
 #define OPT_SIZE 0x10000
+#define OPT_HELP 0x20000
 
 #define DEFAULT_PACKET_DATA_SIZE 56
 #define DEFAULT_PRELOAD_NBR_PACKETS 1
 #define DEFAULT_INTERVAL_BETWEEN_PACKET 1
+#define FLOOD_BASE_INTERVAL 10 * 1000 /* Wait 10 millisecond between packets to give the kernel some space*/
 #define SEQ_NBR_CHK_SIZE ((UINT16_MAX + 1) / 8)
 
 typedef struct s_data_pattern {
@@ -90,6 +92,7 @@ typedef struct s_ft_ping {
     struct sockaddr_in hostsock_addr;
     socklen_t          sock_len;
     int                hostsock_fd;
+    timer_t            timer_id;
 } t_ft_ping;
 
 typedef enum e_ping_state { RECV_MSG, SEND_MSG, END_PROGRAM } t_ping_state;
