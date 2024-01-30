@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 05:09:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 10:02:43 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define FT_PING_H
 
 #include <stdint.h>
+#include <time.h>
 
 #include "translation.h"
 
@@ -50,7 +51,7 @@
 #define DEFAULT_PRELOAD_NBR_PACKETS 1
 #define DEFAULT_INTERVAL_BETWEEN_PACKET 1
 #define FLOOD_BASE_INTERVAL 10 * 1000 /* Wait 10 millisecond between packets to give the kernel some space*/
-#define SEQ_NBR_CHK_SIZE ((UINT16_MAX + 1) / 8)
+#define SEQ_NBR_CHK_SIZE ((UINT16_MAX + 1) / sizeof(uint8_t))
 
 typedef struct s_data_pattern {
     uint8_t pattern[PATTERN_MAX_SIZE];
@@ -79,20 +80,29 @@ typedef struct s_ft_ping {
         t_data_pattern packet_data_pattern;
         size_t         packet_data_size;
         size_t         preload_nbr_packets;
-    } options_value;     /* option value from argument parsing */
-    t_ft_ping_stat stat; /* ping statistics */
+    } options_value; /* option value from argument parsing */
     struct {
-        uint16_t id;
-        uint16_t nbr;
-    } seq;
-    uint8_t     seq_nbr_chk[SEQ_NBR_CHK_SIZE]; /* bit array to check for icmp echo reply sequence number duplicate */
-    const char *node;                          /* node input from user*/
-    char        p_inet_addr[INET_ADDRSTRLEN];  /* presentation internet address */
-    struct sockaddr_in recvsock_addr;
-    struct sockaddr_in hostsock_addr;
-    socklen_t          sock_len;
-    int                hostsock_fd;
-    timer_t            timer_id;
+        struct sockaddr from;
+        char            from_presentation[INET_ADDRSTRLEN];
+        struct sockaddr to;
+        char            to_presentation[INET_ADDRSTRLEN];
+        socklen_t       sock_len;
+    } sockaddr;
+    struct {
+        struct icmp* packet;
+        size_t       packet_size;
+        struct {
+            uint16_t id;
+            uint16_t nbr;
+            uint8_t  nbr_chk[SEQ_NBR_CHK_SIZE]; /* bit array to check for icmp echo reply sequence number duplicate */
+        } seq;
+    } icmp;
+    struct {
+        timer_t           id;
+        struct itimerspec value;
+    } timer;
+    const char* node; /* node input from user*/
+    int         sock_fd;
 } t_ft_ping;
 
 typedef enum e_ping_state { RECV_MSG, SEND_MSG, END_PROGRAM } t_ping_state;
@@ -105,5 +115,8 @@ typedef enum e_ping_state { RECV_MSG, SEND_MSG, END_PROGRAM } t_ping_state;
  *
  */
 extern t_ping_state g_ping_state;
+
+void ft_ping_clean(t_ft_ping* ft_ping);
+int  ft_ping_init(t_ft_ping* ft_ping);
 
 #endif  // FT_PING_H

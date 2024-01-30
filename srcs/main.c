@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 04:58:19 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 10:05:27 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "ft_ping.h"
 #include "icmp.h"
 #include "routine.h"
+#include "utils/wrapper.h"
 
 static t_args_parser_option_entry g_parser_entries[MAX_PARSER_ENTRIES] = {
     /* Option valid for all request types */
@@ -141,8 +142,6 @@ static t_args_parser_config g_args_parser_config = {
 
 };
 
-t_ping_state g_ping_state = SEND_MSG;
-
 void
 sighandler(int signum) {
     if (signum == SIGALRM) {
@@ -152,23 +151,20 @@ sighandler(int signum) {
     }
 }
 
+t_ping_state g_ping_state = SEND_MSG;
+
 int
 main(int argc, char **argv) {
     t_ft_ping        ft_ping = {0};
     struct sigaction sigact  = {0};
-    struct sigevent  sigev   = {0};
 
-    sigact.sa_handler  = sighandler;
-    sigev.sigev_notify = SIGEV_SIGNAL;
-    sigev.sigev_signo  = SIGALRM;
+    sigact.sa_handler = sighandler;
     (void)sigaction(SIGALRM, &sigact, NULL);
     (void)sigaction(SIGINT, &sigact, NULL);
 
     ft_ping.options_value.packet_data_size         = DEFAULT_PACKET_DATA_SIZE;
     ft_ping.options_value.interval_between_packets = DEFAULT_INTERVAL_BETWEEN_PACKET;
     ft_ping.options_value.preload_nbr_packets      = DEFAULT_PRELOAD_NBR_PACKETS;
-    ft_ping.sock_len                               = sizeof(struct sockaddr_in);
-    ft_ping.seq.id                                 = (uint16_t)(getpid() & 0xFFFFU);
 
     g_args_parser_config.input = &ft_ping;
     g_args_parser_config.argc  = argc;
@@ -177,20 +173,13 @@ main(int argc, char **argv) {
     if (ft_args_parser(&g_args_parser_config) == -1) {
         return (1);
     }
-
-    ft_ping.hostsock_fd = get_socket_from_node(ft_ping.node, &ft_ping.hostsock_addr);
-    if (ft_ping.hostsock_fd == -1) {
+    if (ft_ping_init(&ft_ping) == -1) {
         return (1);
     }
-    if (HAS_OPT(&ft_ping, OPT_TIME_TO_LIVE)) {
-        uint8_t ttl = (uint8_t)ft_ping.options_value.packet_time_to_live;
-
-        (void)setsockopt(ft_ping.hostsock_fd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
+    if (ping_routine(&ft_ping) == -1) {
+        return (1);
     }
-    (void)inet_ntop(AF_INET, &ft_ping.hostsock_addr.sin_addr, ft_ping.p_inet_addr, INET_ADDRSTRLEN);
-    (void)timer_create(CLOCK_MONOTONIC, &sigev, &ft_ping.timer_id);
 
-    ping_routine(&ft_ping);
-
+    ft_ping_clean(&ft_ping);
     return (0);
 }
