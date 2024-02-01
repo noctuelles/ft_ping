@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/19 16:00:16 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 08:33:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/01/30 10:04:27 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,13 @@ ipv4_icmp_getaddrinfo(const char *node) {
 }
 
 static int
-get_socket_from_addrinfo_list(struct addrinfo *res, struct sockaddr_in *sockaddr) {
+get_socket_from_addrinfo_list(struct addrinfo *res, struct sockaddr *sockaddr) {
     int fd = -1;
 
     for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
         fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (fd != -1) {
-            ft_memcpy(sockaddr, rp->ai_addr, rp->ai_addrlen);
+            *sockaddr = *rp->ai_addr;
             break;
         }
     }
@@ -56,7 +56,7 @@ get_socket_from_addrinfo_list(struct addrinfo *res, struct sockaddr_in *sockaddr
 }
 
 int
-get_socket_from_node(const char *node, struct sockaddr_in *sockaddr) {
+get_socket_from_node(const char *node, struct sockaddr *sockaddr) {
     struct addrinfo *res = NULL;
     int              fd  = -1;
 

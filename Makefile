@@ -23,10 +23,13 @@ SRCS=\
 		parsing/opts/echo/size.c \
 		parsing/opts/argument.c \
 		parsing/opts/help.c \
+		utils/wrapper.c \
+		utils/time.c \
+		icmp/echo.c \
+		icmp/utils.c \
+		ft_ping.c\
 		main.c  \
-		icmp.c \
 		routine.c \
-		checksum.c \
 		output.c \
 		translation.c
 

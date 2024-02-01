@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_args_parser_fn.h                                :+:      :+:    :+:   */
+/*   parser_fn.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:40 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:03:17 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/01 06:18:55 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_ARGS_PARSER_FN_H
-#define FT_ARGS_PARSER_FN_H
+#ifndef PARSER_OPTS_PARSER_FN_H
+#define PARSER_OPTS_PARSER_FN_H
 
 #include "ft_args_parser.h"
 
@@ -45,4 +45,4 @@ int parse_size(char *argument, t_args_parser_state *parser_state, void *input);
 int parse_arguments(char *argument, t_args_parser_state *parser_state, void *input);
 int parse_help(char *argument, t_args_parser_state *parser_state, void *input);
 
-#endif  // FT_ARGS_PARSER_FN_H
+#endif /* PARSER_OPTS_PARSER_FN_H */

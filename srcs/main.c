@@ -6,12 +6,13 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 10:05:27 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:36:39 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <arpa/inet.h>
 #include <errno.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,9 +21,8 @@
 #include <unistd.h>
 
 #include "ft_args_parser.h"
-#include "ft_args_parser_fn.h"
 #include "ft_ping.h"
-#include "icmp.h"
+#include "parsing/opts/parser_fn.h"
 #include "routine.h"
 #include "utils/wrapper.h"
 
@@ -109,6 +109,13 @@ static t_args_parser_option_entry g_parser_entries[MAX_PARSER_ENTRIES] = {
      .parse_fn                      = parse_preload,
      .description = "send NUMBER packets as fast as possible before falling into normal mode of behavior"},
 
+    {.short_key                     = "f",
+     .long_key                      = "flood",
+     .argument                      = false,
+     .long_key_argument_description = NULL,
+     .parse_fn                      = parse_flood,
+     .description = "send NUMBER packets as fast as possible before falling into normal mode of behavior"},
+
     {.short_key                     = "?",
      .long_key                      = "help",
      .argument                      = false,
@@ -165,6 +172,8 @@ main(int argc, char **argv) {
     ft_ping.options_value.packet_data_size         = DEFAULT_PACKET_DATA_SIZE;
     ft_ping.options_value.interval_between_packets = DEFAULT_INTERVAL_BETWEEN_PACKET;
     ft_ping.options_value.preload_nbr_packets      = DEFAULT_PRELOAD_NBR_PACKETS;
+    ft_ping.stat.max_packet_rtt                    = -INFINITY;
+    ft_ping.stat.min_packet_rtt                    = INFINITY;
 
     g_args_parser_config.input = &ft_ping;
     g_args_parser_config.argc  = argc;
@@ -176,7 +185,7 @@ main(int argc, char **argv) {
     if (ft_ping_init(&ft_ping) == -1) {
         return (1);
     }
-    if (ping_routine(&ft_ping) == -1) {
+    if (ft_ping_routine(&ft_ping) == -1) {
         return (1);
     }
 

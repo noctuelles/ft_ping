@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:02:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 09:30:12 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/01 14:45:59 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 #include <sys/socket.h>
 
-int     setsocketopt_w(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+int     setsockopt_w(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
 ssize_t sendto_w(int fd, const void *buf, size_t n, int flags, const struct sockaddr *addr, socklen_t addr_len);
 int     timer_create_w(clockid_t clockid, struct sigevent *sevp, timer_t *timerid);
 void   *malloc_w(size_t size);

@@ -6,13 +6,14 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 22:05:14 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/30 05:10:22 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/01 06:23:58 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 #include "ft_args_parser.h"
 #include "ft_ping.h"
@@ -20,24 +21,45 @@
 
 void
 print_introduction(const t_ft_ping *ft_ping) {
-    (void)printf("PING %s (%s): %lu data bytes", ft_ping->node, ft_ping->p_inet_addr,
+    (void)printf("PING %s (%s): %lu data bytes", ft_ping->node, ft_ping->sockaddr.host_presentation,
                  ft_ping->options_value.packet_data_size);
     if (HAS_OPT(ft_ping, OPT_VERBOSE)) {
-        (void)printf(", id %#04x = %u", ft_ping->seq.id, ft_ping->seq.id);
+        (void)printf(", id %#04x = %u", ft_ping->icmp.seq.id, ft_ping->icmp.seq.id);
     }
     (void)printf("\n");
 }
 
 void
-print_echo(const t_ft_ping *ft_ping, const struct ip *ip, const struct icmp *icmp, bool dup) {
+print_outroduction(const t_ft_ping *ft_ping) {
+    (void)printf("--- %s ping statistics ---\n", ft_ping->node);
+
+    (void)printf("%lu packets transmitted, %lu received", ft_ping->stat.packet_sent, ft_ping->stat.packet_received);
+    if (ft_ping->stat.packet_duplicate != 0) {
+        (void)printf(", +%lu duplicates", ft_ping->stat.packet_duplicate);
+    }
+    (void)printf(", %lu%% packet loss",
+                 (ft_ping->stat.packet_sent - ft_ping->stat.packet_received) * 100 / ft_ping->stat.packet_sent);
+    (void)printf("\n");
+
+    if (ft_ping->stat.last_packet_rtt != 0.0) {
+        (void)printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", ft_ping->stat.min_packet_rtt,
+                     ft_ping->stat.avg_packet_rtt / (double)ft_ping->stat.packet_received, ft_ping->stat.max_packet_rtt,
+                     0.0f);
+    }
+}
+
+void
+print_echo(const t_ft_ping *ft_ping, const t_packet_info *pi) {
     if (HAS_OPT(ft_ping, OPT_FLOOD)) {
         ft_putchar('\b');
         return;
     }
-
-    printf("%u bytes from %s: icmp_seq=%u ttl=%u", (uint16_t)(ntohs(ip->ip_len) - (ip->ip_hl << 2U)),
-           ft_ping->p_inet_addr, ntohs(icmp->icmp_hun.ih_idseq.icd_seq), ip->ip_ttl);
-    if (dup) {
+    printf("%u bytes from %s: icmp_seq=%u ttl=%u", pi->icmp_payload_len, ft_ping->sockaddr.sender_presentation,
+           ntohs(pi->icmp->icmp_hun.ih_idseq.icd_seq), pi->ip->ip_ttl);
+    if (pi->icmp_payload_len - ICMP_MINLEN >= (uint16_t)sizeof(struct timeval)) {
+        printf(" time=%.3f ms", ft_ping->stat.last_packet_rtt);
+    }
+    if (pi->duplicate) {
         printf(" (DUP!)");
     }
     printf("\n");
