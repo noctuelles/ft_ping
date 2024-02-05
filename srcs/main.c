@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/01 14:36:39 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/02 12:53:27 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 #include "ft_args_parser.h"
 #include "ft_ping.h"
+#include "icmp/echo.h"
 #include "parsing/opts/parser_fn.h"
 #include "routine.h"
 #include "utils/wrapper.h"
@@ -149,21 +150,18 @@ static t_args_parser_config g_args_parser_config = {
 
 };
 
+t_ping_state g_ping_state = RUNNING;
+
 void
 sighandler(int signum) {
-    if (signum == SIGALRM) {
-        g_ping_state = SEND_MSG;
-    } else if (signum == SIGINT) {
-        g_ping_state = END_PROGRAM;
-    }
+    (void)signum;
+    g_ping_state = ENDING;
 }
-
-t_ping_state g_ping_state = SEND_MSG;
 
 int
 main(int argc, char **argv) {
-    t_ft_ping        ft_ping = {0};
     struct sigaction sigact  = {0};
+    t_ft_ping        ft_ping = {0};
 
     sigact.sa_handler = sighandler;
     (void)sigaction(SIGALRM, &sigact, NULL);
@@ -188,7 +186,6 @@ main(int argc, char **argv) {
     if (ft_ping_routine(&ft_ping) == -1) {
         return (1);
     }
-
     ft_ping_clean(&ft_ping);
     return (0);
 }

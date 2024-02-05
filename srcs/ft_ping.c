@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/01 14:44:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/02 04:47:00 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <arpa/inet.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
@@ -48,20 +49,8 @@ ft_ping_init_setsockopt(const t_ft_ping *ft_ping) {
     return (0);
 }
 
-static void
-ft_ping_init_set_timer_value(t_ft_ping *ft_ping) {
-    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
-        ft_ping->timer.value.it_value.tv_nsec    = FLOOD_BASE_INTERVAL;
-        ft_ping->timer.value.it_interval.tv_nsec = ft_ping->timer.value.it_value.tv_nsec;
-    } else {
-        ft_ping->timer.value.it_value.tv_sec    = ft_ping->options_value.interval_between_packets;
-        ft_ping->timer.value.it_interval.tv_sec = ft_ping->timer.value.it_value.tv_sec;
-    }
-}
-
 void
 ft_ping_clean(t_ft_ping *ft_ping) {
-    (void)timer_delete(ft_ping->timer.id);
     if (ft_ping->sock_fd != -1) {
         (void)close(ft_ping->sock_fd); /* Not checking return of close because we're using raw socket */
     }
@@ -95,23 +84,15 @@ ft_ping_on_recv_update_stat(t_ft_ping_stat *ft_ping_stat, const t_packet_info *p
 
 int
 ft_ping_init(t_ft_ping *ft_ping) {
-    struct sigevent sigev = {0};
-
-    sigev.sigev_notify = SIGEV_SIGNAL;
-    sigev.sigev_signo  = SIGALRM;
-
     ft_ping->sock_fd          = -1;
     ft_ping->sockaddr.len     = sizeof(struct sockaddr_in);
     ft_ping->icmp.seq.id      = (uint16_t)(getpid() & 0xFFFF);
     ft_ping->icmp.packet_size = ICMP_MINLEN + ft_ping->options_value.packet_data_size;
 
-    if (timer_create_w(CLOCK_MONOTONIC, &sigev, &ft_ping->timer.id) == -1) {
-        goto error;
-    }
-    ft_ping_init_set_timer_value(ft_ping);
     if ((ft_ping->icmp.packet = malloc_w(ft_ping->icmp.packet_size)) == NULL) {
         goto error;
     }
+    puts(ft_ping->node);
     if ((ft_ping->sock_fd = get_socket_from_node(ft_ping->node, &ft_ping->sockaddr.host)) == -1) {
         goto error;
     }

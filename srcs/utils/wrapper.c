@@ -6,9 +6,11 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:00:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/31 03:50:20 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/04 12:32:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "utils/wrapper.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -22,15 +24,6 @@ int
 setsockopt_w(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
     if (setsockopt(sockfd, level, optname, optval, optlen) == -1) {
         ft_error(0, errno, "cannot set socket option");
-        return (-1);
-    }
-    return (0);
-}
-
-int
-timer_create_w(clockid_t clockid, struct sigevent *sevp, timer_t *timerid) {
-    if (timer_create(clockid, sevp, timerid) == -1) {
-        ft_error(0, errno, "cannot create timer");
         return (-1);
     }
     return (0);
@@ -63,8 +56,12 @@ recvmsg_w(int sockfd, struct msghdr *msg, int flags) {
     ssize_t ret = 0;
 
     if ((ret = recvmsg(sockfd, msg, flags)) == -1) {
-        if (errno != EINTR) {
+        if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
             ft_error(0, errno, "cannot receive packet");
+        } else if (errno == EINTR) {
+            ret = RECVMSGW_INTERRUPT;
+        } else {
+            ret = RECVMSGW_WOULD_BLOCK;
         }
     }
 

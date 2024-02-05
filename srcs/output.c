@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 22:05:14 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/01 06:23:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/04 12:53:44 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,15 @@ print_outroduction(const t_ft_ping *ft_ping) {
 
 void
 print_echo(const t_ft_ping *ft_ping, const t_packet_info *pi) {
-    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
-        ft_putchar('\b');
+    if (HAS_OPT(ft_ping, OPT_QUIET)) {
         return;
     }
+
+    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+        printf("\b \b");
+        return;
+    }
+
     printf("%u bytes from %s: icmp_seq=%u ttl=%u", pi->icmp_payload_len, ft_ping->sockaddr.sender_presentation,
            ntohs(pi->icmp->icmp_hun.ih_idseq.icd_seq), pi->ip->ip_ttl);
     if (pi->icmp_payload_len - ICMP_MINLEN >= (uint16_t)sizeof(struct timeval)) {

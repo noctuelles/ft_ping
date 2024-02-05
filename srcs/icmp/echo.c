@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 06:04:38 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/01 14:41:07 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/05 11:37:15 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,10 @@ icmp_echo_send_packet(t_ft_ping *ft_ping) {
                                ft_ping->options_value.packet_data_size);
     ft_ping->icmp.packet->icmp_cksum = icmp_checksum(ft_ping->icmp.packet, ft_ping->icmp.packet_size);
 
-    if (sendto_w(ft_ping->sock_fd, ft_ping->icmp.packet, ft_ping->icmp.packet_size, 0, &ft_ping->sockaddr.host,
-                 ft_ping->sockaddr.len) == -1) {
+    if () {
         return (-1);
     }
 
-    ft_ping->stat.packet_sent++;
     ft_ping->icmp.seq.nbr++;
 
     return (0);

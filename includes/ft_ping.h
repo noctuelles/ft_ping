@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/01 06:35:46 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/05 12:00:01 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@
 #define DEFAULT_PACKET_DATA_SIZE 56
 #define DEFAULT_PRELOAD_NBR_PACKETS 1
 #define DEFAULT_INTERVAL_BETWEEN_PACKET 1
-#define FLOOD_BASE_INTERVAL 200 * 1000 /* Wait 10 millisecond between packets to give the kernel some space*/
+#define FLOOD_BASE_INTERVAL 30 * 1000 /* Wait 10 millisecond between packets to give the kernel some space*/
 #define SEQ_NBR_CHK_SIZE ((UINT16_MAX + 1) / sizeof(uint8_t))
 #define PACKET_CAN_HAVE_STRUCT_TIMEVAL(icmp_packet_info) \
     ((icmp_packet_info)->icmp_payload_len - ICMP_MINLEN >= sizeof(struct timeval))
@@ -79,20 +79,34 @@ typedef struct s_packet_info {
                        packet.*/
 } t_packet_info;
 
-typedef struct s_ft_ping {
-    uint64_t option_flags;
-    struct {
-        size_t   count;
-        time_t   interval_between_packets;
-        uint64_t packet_time_to_live;
-        uint64_t packet_type_of_service;
-        time_t   timeout;
-        time_t   linger;
+typedef struct s_ft_ping_option_values {
+    size_t   count;
+    time_t   interval_between_packets;
+    uint64_t packet_time_to_live;
+    uint64_t packet_type_of_service;
+    time_t   timeout;
+    time_t   linger;
 
-        t_data_pattern packet_data_pattern;
-        size_t         packet_data_size;
-        size_t         preload_nbr_packets;
-    } options_value; /* option value from argument parsing */
+    t_data_pattern packet_data_pattern;
+    size_t         packet_data_size;
+    size_t         preload_nbr_packets;
+} t_ft_ping_option_values;
+
+typedef struct s_ft_ping_icmp {
+    struct icmp* packet;
+    size_t       packet_size;
+    struct {
+        uint16_t id;
+        uint16_t nbr;
+        uint8_t  nbr_chk[SEQ_NBR_CHK_SIZE]; /* bit array to check for icmp echo reply sequence number duplicate */
+    } seq;
+} t_ft_ping_icmp;
+
+typedef void (*t_prepare_packet)(t_ft_ping_icmp*, const t_ft_ping_option_values*, uint64_t option_flags);
+
+typedef struct s_ft_ping {
+    uint64_t                option_flags;
+    t_ft_ping_option_values options_value;
     struct {
         struct sockaddr host;
         char            host_presentation[INET_ADDRSTRLEN];
@@ -100,32 +114,18 @@ typedef struct s_ft_ping {
         char            sender_presentation[NI_MAXHOST];
         socklen_t       len;
     } sockaddr;
-    struct {
-        struct icmp* packet;
-        size_t       packet_size;
-        struct {
-            uint16_t id;
-            uint16_t nbr;
-            uint8_t  nbr_chk[SEQ_NBR_CHK_SIZE]; /* bit array to check for icmp echo reply sequence number duplicate */
-        } seq;
-    } icmp;
-    struct {
-        timer_t           id;
-        struct itimerspec value;
-    } timer;
-    t_ft_ping_stat stat;
-    const char*    node; /* node input from user*/
-    int            sock_fd;
+    t_ft_ping_icmp   icmp;
+    t_ft_ping_stat   stat;
+    t_prepare_packet prepare_packet_fn;
+    const char*      node; /* node input from user */
+    int              sock_fd;
 } t_ft_ping;
 
-typedef enum e_ping_state { RECV_MSG, SEND_MSG, END_PROGRAM } t_ping_state;
+typedef enum e_ping_state { RUNNING, ENDING } t_ping_state;
 
 /**
- * @brief this global variable is used to track the state of the program, because the signal handler that catches
- * SIGARLM and SIGINT needs to inform the main ping routine on the action that shall be taken.
- * This mechanism is used to avoid any business logic in the signal handler, an avoid common mistake such as calling
- * malloc or free in a signal handler (which is not signal safe).
- *
+ * @brief this global variable is used to track if the ping routine should continue to run or not. This variable is
+ * accessed only in the signal handler that catch SIGINT and SIGALRM, and in the ping routine.
  */
 extern t_ping_state g_ping_state;
 
