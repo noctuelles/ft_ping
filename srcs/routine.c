@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:06:23 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:52:49 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "ft_ping.h"
@@ -106,8 +107,8 @@ can_send_packet(const t_ft_ping *ft_ping) {
  */
 static bool
 watchdog(t_ft_ping *ft_ping, int *flags) {
-    struct timeval   tv = {0};
-    struct itimerval it = {0};
+    struct timeval    tv  = {0};
+    struct itimerspec its = {0};
 
     if (g_ping_state < RUNNING) {
         return (false);
@@ -139,8 +140,8 @@ watchdog(t_ft_ping *ft_ping, int *flags) {
                 return (false);
             } else {
                 if (HAS_OPT(ft_ping, OPT_LINGER)) {
-                    it.it_value.tv_sec = ft_ping->options_value.linger;
-                    setitimer(ITIMER_REAL, &it, NULL);
+                    its.it_value.tv_sec = ft_ping->options_value.linger;
+                    (void)timer_settime(ft_ping->timer_id, 0, &its, NULL);
                 }
             }
         }
@@ -217,15 +218,13 @@ ft_ping_main_loop(t_ft_ping *ft_ping) {
 
 int
 ft_ping_routine(t_ft_ping *ft_ping) {
-    struct itimerval it = {0};
+    struct itimerspec its = {0};
 
     print_introduction(ft_ping);
     if (HAS_OPT(ft_ping, OPT_TIMEOUT)) {
-        it.it_value.tv_sec = ft_ping->options_value.timeout;
-
-        setitimer(ITIMER_REAL, &it, NULL);
+        its.it_value.tv_sec = ft_ping->options_value.timeout;
+        (void)timer_settime(ft_ping->timer_id, 0, &its, NULL);
     }
-
     if (ft_ping_main_loop(ft_ping) == -1) {
         return (-1);
     }

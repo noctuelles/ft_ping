@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/31 16:44:13 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:07:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 06:04:47 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@
  */
 double
 compute_round_trip_time(struct icmp *icmp_packet) {
-    struct timeval  currtime    = {0};
-    struct timeval *packet_time = NULL;
+    struct timespec  currtime    = {0};
+    struct timespec *packet_time = NULL;
 
-    packet_time = (struct timeval *)icmp_packet->icmp_dun.id_data;
-    (void)gettimeofday(&currtime, NULL);
+    packet_time = (struct timespec *)icmp_packet->icmp_dun.id_data;
+    (void)clock_gettime(CLOCK_MONOTONIC, &currtime);
 
     return ((double)(currtime.tv_sec - packet_time->tv_sec) * 1000.0 +
-            (double)(currtime.tv_usec - packet_time->tv_usec) / 1000.0);
+            (double)(currtime.tv_nsec - packet_time->tv_nsec) / 1000000.0);
 }
 
 /**

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:00:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/04 12:32:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:29:02 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,17 @@ sendto_w(int fd, const void *buf, size_t n, int flags, const struct sockaddr *ad
 
     if ((ret = sendto(fd, buf, n, flags, addr, addr_len)) == -1) {
         ft_error(0, errno, "cannot send packet");
+    }
+
+    return ret;
+}
+
+int
+timer_create_w(clockid_t clockid, struct sigevent *sevp, timer_t *timerid) {
+    int ret = 0;
+
+    if ((ret = timer_create(clockid, sevp, timerid)) == -1) {
+        ft_error(0, errno, "cannot create timer");
     }
 
     return ret;

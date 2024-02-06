@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:07:42 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:28:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ typedef struct s_ft_ping {
     t_prepare_packet prepare_packet_fn;
     const char*      node; /* node input from user */
     int              sock_fd;
+    timer_t          timer_id;
 } t_ft_ping;
 
 typedef enum e_ping_state { ENDING, RUNNING, RUNNING_NO_WAIT, RUNNING_SEND_DISABLE } t_ping_state;

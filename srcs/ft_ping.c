@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:23:01 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:37:40 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,28 @@ ft_ping_init_setsockopt(const t_ft_ping *ft_ping) {
     return (0);
 }
 
+static int
+ft_ping_init_timer(t_ft_ping *ft_ping) {
+    struct sigevent sev = {0};
+
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo  = SIGALRM;
+
+    if (timer_create_w(CLOCK_MONOTONIC, &sev, &ft_ping->timer_id) == -1) {
+        return (-1);
+    }
+
+    return (0);
+}
+
 void
 ft_ping_clean(t_ft_ping *ft_ping) {
-    if (ft_ping->sock_fd != -1) {
-        (void)close(ft_ping->sock_fd); /* Not checking return of close because we're using raw socket */
-    }
     if (ft_ping->icmp.packet != NULL) {
         free(ft_ping->icmp.packet);
+    }
+    (void)timer_delete(ft_ping->timer_id);
+    if (ft_ping->sock_fd != -1) {
+        (void)close(ft_ping->sock_fd); /* Not checking return of close because we're using raw socket */
     }
 }
 
@@ -99,7 +114,9 @@ ft_ping_init(t_ft_ping *ft_ping) {
     if ((ft_ping->icmp.packet = malloc_w(ft_ping->icmp.packet_size)) == NULL) {
         goto error;
     }
-    puts(ft_ping->node);
+    if (ft_ping_init_timer(ft_ping) == -1) {
+        goto error;
+    }
     if ((ft_ping->sock_fd = get_socket_from_node(ft_ping->node, &ft_ping->sockaddr.host)) == -1) {
         goto error;
     }

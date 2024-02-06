@@ -6,12 +6,12 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 06:04:38 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 04:17:35 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:55:41 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <netinet/ip_icmp.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include "ft_ping.h"
 #include "icmp/utils.h"
@@ -44,8 +44,8 @@ fill_icmp_echo_packet_header(struct icmphdr *icmp_echo_packet_header, uint16_t s
 void
 fill_icmp_echo_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern *data_pattern,
                            size_t packet_data_length) {
-    if (packet_data_length >= sizeof(struct timeval)) {
-        (void)gettimeofday((struct timeval *)icmp_echo_packet_data, NULL);
+    if (packet_data_length >= sizeof(struct timespec)) {
+        (void)clock_gettime(CLOCK_MONOTONIC, (struct timespec *)icmp_echo_packet_data);
 
         icmp_echo_packet_data += sizeof(struct timeval);
         packet_data_length -= sizeof(struct timeval);
