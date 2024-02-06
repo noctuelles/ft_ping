@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 14:46:41 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 10:41:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:04:28 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ parse_timeout(char *argument, t_args_parser_state *parser_state, void *input) {
     t_ft_ping *ft_ping = (t_ft_ping *)input;
 
     if (!ft_strmatch_int(argument)) {
-        parser_state->error_message = "argument must be a positive integer";
+        parser_state->error_message = "invalid value";
         return (-1);
     }
 

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/05 12:00:01 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:07:42 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@
 
 #define DEFAULT_PACKET_DATA_SIZE 56
 #define DEFAULT_PRELOAD_NBR_PACKETS 1
-#define DEFAULT_INTERVAL_BETWEEN_PACKET 1
 #define FLOOD_BASE_INTERVAL 30 * 1000 /* Wait 10 millisecond between packets to give the kernel some space*/
 #define SEQ_NBR_CHK_SIZE ((UINT16_MAX + 1) / sizeof(uint8_t))
 #define PACKET_CAN_HAVE_STRUCT_TIMEVAL(icmp_packet_info) \
@@ -80,12 +79,12 @@ typedef struct s_packet_info {
 } t_packet_info;
 
 typedef struct s_ft_ping_option_values {
-    size_t   count;
-    time_t   interval_between_packets;
-    uint64_t packet_time_to_live;
-    uint64_t packet_type_of_service;
-    time_t   timeout;
-    time_t   linger;
+    size_t         count;
+    struct timeval interval_between_packets;
+    time_t         timeout;
+    time_t         linger;
+    uint64_t       packet_time_to_live;
+    uint64_t       packet_type_of_service;
 
     t_data_pattern packet_data_pattern;
     size_t         packet_data_size;
@@ -121,7 +120,7 @@ typedef struct s_ft_ping {
     int              sock_fd;
 } t_ft_ping;
 
-typedef enum e_ping_state { RUNNING, ENDING } t_ping_state;
+typedef enum e_ping_state { ENDING, RUNNING, RUNNING_NO_WAIT, RUNNING_SEND_DISABLE } t_ping_state;
 
 /**
  * @brief this global variable is used to track if the ping routine should continue to run or not. This variable is
