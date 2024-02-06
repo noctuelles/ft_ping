@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/02 12:53:27 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:08:08 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include "icmp/echo.h"
 #include "parsing/opts/parser_fn.h"
 #include "routine.h"
+#include "utils/time.h"
 #include "utils/wrapper.h"
 
 static t_args_parser_option_entry g_parser_entries[MAX_PARSER_ENTRIES] = {
@@ -168,7 +169,7 @@ main(int argc, char **argv) {
     (void)sigaction(SIGINT, &sigact, NULL);
 
     ft_ping.options_value.packet_data_size         = DEFAULT_PACKET_DATA_SIZE;
-    ft_ping.options_value.interval_between_packets = DEFAULT_INTERVAL_BETWEEN_PACKET;
+    ft_ping.options_value.interval_between_packets = get_timeval_from_secs(1.0);
     ft_ping.options_value.preload_nbr_packets      = DEFAULT_PRELOAD_NBR_PACKETS;
     ft_ping.stat.max_packet_rtt                    = -INFINITY;
     ft_ping.stat.min_packet_rtt                    = INFINITY;

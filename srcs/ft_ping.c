@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/02 04:47:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/06 05:23:01 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ ft_ping_init_setsockopt(const t_ft_ping *ft_ping) {
     int ttl        = 0;
     int tos        = 0;
     int dont_route = 0;
+    int debug      = 0;
 
     if (HAS_OPT(ft_ping, OPT_TIME_TO_LIVE)) {
         ttl = (int)ft_ping->options_value.packet_time_to_live;
@@ -43,6 +44,12 @@ ft_ping_init_setsockopt(const t_ft_ping *ft_ping) {
     if (HAS_OPT(ft_ping, OPT_IGNORE_ROUTING)) {
         dont_route = 1;
         if (setsockopt_w(ft_ping->sock_fd, SOL_SOCKET, SO_DONTROUTE, &dont_route, sizeof(dont_route)) == -1) {
+            return (-1);
+        }
+    }
+    if (HAS_OPT(ft_ping, OPT_DEBUG)) {
+        debug = 1;
+        if (setsockopt_w(ft_ping->sock_fd, SOL_SOCKET, SO_DEBUG, &debug, sizeof(debug)) == -1) {
             return (-1);
         }
     }
