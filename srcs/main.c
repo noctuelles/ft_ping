@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:08:08 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/08 05:22:30 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,12 +151,15 @@ static t_args_parser_config g_args_parser_config = {
 
 };
 
-t_ping_state g_ping_state = RUNNING;
+t_ping_state g_ping_state = RUNNING_SEND_PRELOADING;
 
 void
 sighandler(int signum) {
-    (void)signum;
-    g_ping_state = ENDING;
+    if (signum == SIGALRM) {
+        g_ping_state = RUNNING_SEND;
+    } else {
+        g_ping_state = ENDING;
+    }
 }
 
 int
@@ -168,11 +171,11 @@ main(int argc, char **argv) {
     (void)sigaction(SIGALRM, &sigact, NULL);
     (void)sigaction(SIGINT, &sigact, NULL);
 
-    ft_ping.options_value.packet_data_size         = DEFAULT_PACKET_DATA_SIZE;
-    ft_ping.options_value.interval_between_packets = get_timeval_from_secs(1.0);
-    ft_ping.options_value.preload_nbr_packets      = DEFAULT_PRELOAD_NBR_PACKETS;
-    ft_ping.stat.max_packet_rtt                    = -INFINITY;
-    ft_ping.stat.min_packet_rtt                    = INFINITY;
+    ft_ping.options_value.packet_data_size            = DEFAULT_PACKET_DATA_SIZE;
+    ft_ping.options_value.ms_interval_between_packets = 1000;
+    ft_ping.options_value.preload_nbr_packets         = DEFAULT_PRELOAD_NBR_PACKETS;
+    ft_ping.stat.max_packet_rtt                       = -INFINITY;
+    ft_ping.stat.min_packet_rtt                       = INFINITY;
 
     g_args_parser_config.input = &ft_ping;
     g_args_parser_config.argc  = argc;

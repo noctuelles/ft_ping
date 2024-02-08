@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:00:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:29:02 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/08 05:10:31 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,10 @@ recvmsg_w(int sockfd, struct msghdr *msg, int flags) {
     if ((ret = recvmsg(sockfd, msg, flags)) == -1) {
         if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
             ft_error(0, errno, "cannot receive packet");
-        } else if (errno == EINTR) {
-            ret = RECVMSGW_INTERRUPT;
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return RECVMSGW_WOULD_BLOCK;
         } else {
-            ret = RECVMSGW_WOULD_BLOCK;
+            return RECVMSGW_INTERRUPT;
         }
     }
 
