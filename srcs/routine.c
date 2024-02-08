@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/08 05:34:04 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/08 05:40:09 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,9 +129,14 @@ watchdog(t_ft_ping *ft_ping) {
             if (ft_ping->options_value.preload_nbr_packets == 0) {
                 struct itimerspec its = {0};
 
-                its.it_interval.tv_sec  = ft_ping->options_value.ms_interval_between_packets / 1000;
-                its.it_interval.tv_nsec = (ft_ping->options_value.ms_interval_between_packets % 1000) * 1e6;
-                its.it_value            = its.it_interval;
+                if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+                    its.it_interval.tv_sec  = 0;
+                    its.it_interval.tv_nsec = 10000000;
+                } else {
+                    its.it_interval.tv_sec  = ft_ping->options_value.ms_interval_between_packets / 1000;
+                    its.it_interval.tv_nsec = (ft_ping->options_value.ms_interval_between_packets % 1000) * 1e6;
+                }
+                its.it_value = its.it_interval;
 
                 timer_settime(ft_ping->timer_id, 0, &its, NULL);
             } else {
