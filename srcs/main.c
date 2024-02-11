@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/08 05:22:30 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 11:07:58 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ sighandler(int signum) {
     if (signum == SIGALRM) {
         g_ping_state = RUNNING_SEND;
     } else {
-        g_ping_state = ENDING;
+        g_ping_state = FINISHING;
     }
 }
 

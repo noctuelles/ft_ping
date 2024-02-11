@@ -25,10 +25,13 @@ SRCS=\
 		parsing/opts/help.c \
 		utils/wrapper.c \
 		utils/time.c \
+		utils/net.c \
 		icmp/echo.c \
 		icmp/utils.c \
+		icmp/default.c \
 		ft_ping.c\
 		main.c  \
+		watchdog.c \
 		routine.c \
 		output.c \
 		translation.c

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 22:05:14 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/04 12:53:44 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 19:01:12 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,22 +49,25 @@ print_outroduction(const t_ft_ping *ft_ping) {
 }
 
 void
-print_echo(const t_ft_ping *ft_ping, const t_packet_info *pi) {
+print_icmp_echo_reply(const t_ft_ping *ft_ping, const t_incoming_packet_info *pi, bool duplicate) {
+    t_sockaddr_str sockaddr_str;
+
     if (HAS_OPT(ft_ping, OPT_QUIET)) {
         return;
     }
-
     if (HAS_OPT(ft_ping, OPT_FLOOD)) {
-        printf("\b \b");
+        printf("\b");
         return;
     }
-
-    printf("%u bytes from %s: icmp_seq=%u ttl=%u", pi->icmp_payload_len, ft_ping->sockaddr.sender_presentation,
+    if (sockaddr2str(&pi->from.sockaddr, pi->from.socklen, &sockaddr_str, true) == SOCKADDR2STR_ERR) {
+        return;
+    }
+    printf("%u bytes from %s: icmp_seq=%u ttl=%u", pi->icmp_payload_len, sockaddr_str.ip_str,
            ntohs(pi->icmp->icmp_hun.ih_idseq.icd_seq), pi->ip->ip_ttl);
     if (pi->icmp_payload_len - ICMP_MINLEN >= (uint16_t)sizeof(struct timeval)) {
         printf(" time=%.3f ms", ft_ping->stat.last_packet_rtt);
     }
-    if (pi->duplicate) {
+    if (duplicate) {
         printf(" (DUP!)");
     }
     printf("\n");

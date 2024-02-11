@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:00:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/08 05:10:31 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/10 18:21:17 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ recvmsg_w(int sockfd, struct msghdr *msg, int flags) {
         if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
             ft_error(0, errno, "cannot receive packet");
         } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return RECVMSGW_WOULD_BLOCK;
+            return RECVMSGW_TIMEOUT;
         } else {
             return RECVMSGW_INTERRUPT;
         }
@@ -85,7 +85,10 @@ getnameinfo_w(const struct sockaddr *sa, socklen_t salen, char *host, size_t hos
     int ret = 0;
 
     if ((ret = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags)) != 0) {
-        ft_error(0, errno, "cannot get name info");
+        if (ret == EAI_SYSTEM)
+            ft_error(0, errno, "cannot get name info");
+        else
+            ft_error(0, 0, "cannot get name info: %s", gai_strerror(ret));
     }
 
     return ret;

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:37:40 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 19:04:02 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,29 +78,6 @@ ft_ping_clean(t_ft_ping *ft_ping) {
     (void)timer_delete(ft_ping->timer_id);
     if (ft_ping->sock_fd != -1) {
         (void)close(ft_ping->sock_fd); /* Not checking return of close because we're using raw socket */
-    }
-}
-
-void
-ft_ping_on_recv_update_stat(t_ft_ping_stat *ft_ping_stat, const t_packet_info *pi) {
-    if (pi->duplicate) {
-        ft_ping_stat->packet_duplicate++;
-    } else {
-        ft_ping_stat->packet_received++;
-    }
-
-    if (pi->icmp_payload_len - ICMP_MINLEN >= (uint16_t)sizeof(struct timeval)) {
-        ft_ping_stat->last_packet_rtt = compute_round_trip_time(pi->icmp);
-
-        if (ft_ping_stat->last_packet_rtt < ft_ping_stat->min_packet_rtt) {
-            ft_ping_stat->min_packet_rtt = ft_ping_stat->last_packet_rtt;
-        }
-
-        if (ft_ping_stat->last_packet_rtt > ft_ping_stat->max_packet_rtt) {
-            ft_ping_stat->max_packet_rtt = ft_ping_stat->last_packet_rtt;
-        }
-
-        ft_ping_stat->avg_packet_rtt += ft_ping_stat->last_packet_rtt;
     }
 }
 

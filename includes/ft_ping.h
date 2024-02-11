@@ -6,18 +6,21 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/08 04:59:29 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 19:03:39 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_PING_H
 #define FT_PING_H
 
+#include <limits.h>
+#include <netinet/ip_icmp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
 #include "translation.h"
+#include "utils/net.h"
 
 #define TOGGLE_OPT(ft_ping, option) ((ft_ping)->option_flags ^= option)
 #define HAS_OPT(ft_ping, option) ((ft_ping)->option_flags & (option))
@@ -70,13 +73,17 @@ typedef struct s_ft_ping_stat {
     double avg_packet_rtt;
 } t_ft_ping_stat;
 
-typedef struct s_packet_info {
-    struct ip*   ip;
-    struct icmp* icmp;
-    uint16_t     icmp_payload_len;
-    bool duplicate; /* In case of an ICMP Echo Response that has the same sequence number as a previously received
-                       packet.*/
-} t_packet_info;
+typedef struct s_incoming_packet_info {
+    struct ip*   ip;   /* Pointer to the first byte of the IP Header*/
+    struct icmp* icmp; /* Pointer to the first byte of the ICMP Header */
+    struct {
+        struct sockaddr sockaddr; /* Sender sockaddr */
+        socklen_t       socklen;  /* Sender sockaddr size */
+    } from;
+    uint16_t icmp_payload_len; /* Size of the ICMP payload. */
+    bool     duplicate; /* In case of an ICMP Echo Response that has the same sequence number as a previously received
+                           packet.*/
+} t_incoming_packet_info;
 
 typedef struct s_ft_ping_option_values {
     size_t   count;
@@ -101,28 +108,24 @@ typedef struct s_ft_ping_icmp {
     } seq;
 } t_ft_ping_icmp;
 
-typedef void (*t_prepare_packet)(t_ft_ping_icmp*, const t_ft_ping_option_values*, uint64_t option_flags);
-
 typedef struct s_ft_ping {
     uint64_t                option_flags;
     t_ft_ping_option_values options_value;
     struct {
         struct sockaddr host;
         char            host_presentation[INET_ADDRSTRLEN];
-        struct sockaddr sender;
-        char            sender_presentation[NI_MAXHOST];
         socklen_t       len;
     } sockaddr;
-    t_ft_ping_icmp   icmp;
-    t_ft_ping_stat   stat;
-    t_prepare_packet prepare_packet_fn;
-    const char*      node; /* node input from user */
-    int              sock_fd;
-    timer_t          timer_id;
-    struct timespec  start_time;
+    t_ft_ping_icmp    icmp;
+    t_ft_ping_stat    stat;
+    const char*       node; /* node input from user */
+    int               sock_fd;
+    timer_t           timer_id;
+    struct itimerspec timer_spec;
+    struct timespec   start_time;
 } t_ft_ping;
 
-typedef enum e_ping_state { ENDING, RUNNING, RUNNING_SEND, RUNNING_SEND_PRELOADING, RUNNING_RECV } t_ping_state;
+typedef enum e_ping_state { FINISHING, RUNNING_RECV, RUNNING_SEND, RUNNING_SEND_PRELOADING } t_ping_state;
 
 /**
  * @brief this global variable is used to track if the ping routine should continue to run or not. This variable is
@@ -133,6 +136,6 @@ extern t_ping_state g_ping_state;
 void ft_ping_clean(t_ft_ping* ft_ping);
 int  ft_ping_init(t_ft_ping* ft_ping);
 
-void ft_ping_on_recv_update_stat(t_ft_ping_stat* ft_ping_stat, const t_packet_info* pi);
+void ft_ping_on_recv_update_stat(t_ft_ping_stat* ft_ping_stat, const t_incoming_packet_info* pi);
 
 #endif  // FT_PING_H
