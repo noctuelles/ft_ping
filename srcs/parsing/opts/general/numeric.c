@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 10:35:02 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 10:35:14 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:24:44 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_numeric(char *argument, t_args_parser_state *parser_state, void *input) {
     (void)argument;
     (void)parser_state;
 
-    TOGGLE_OPT(ft_ping, OPT_NUMERIC);
+    ft_ping->options.numeric = true;
 
     return (0);
 }

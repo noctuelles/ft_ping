@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:14:06 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:35:36 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ recv_incoming_packet(t_ft_ping *ft_ping, uint8_t *buffer, size_t buffer_size, t_
             break;
         }
         default:
-            print_icmp_default(pi, (bool)HAS_OPT(ft_ping, OPT_VERBOSE), (bool)HAS_OPT(ft_ping, OPT_NUMERIC));
+            print_icmp_default(pi, ft_ping->options.verbose, ft_ping->options.numeric);
     }
     return (-1);
 }
@@ -150,7 +150,7 @@ ft_ping_routine(t_ft_ping *ft_ping) {
 
     (void)clock_gettime(CLOCK_MONOTONIC, &ft_ping->start_time);
 
-    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+    if (ft_ping->options.flood) {
         ft_ping->timer_spec.it_value.tv_sec  = 0;
         ft_ping->timer_spec.it_value.tv_nsec = 10 * 1e6;
     } else {

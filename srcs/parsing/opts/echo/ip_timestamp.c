@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 11:10:17 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:11:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:19:45 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_ip_timestamp(char *argument, t_args_parser_state *parser_state, void *inpu
     (void)argument;
     (void)parser_state;
 
-    TOGGLE_OPT(ft_ping, OPT_IP_TIMESTAMP);
+    ft_ping->options.ip_timestamp = true;
 
     return (0);
 }

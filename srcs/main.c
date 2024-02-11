@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 11:07:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:30:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,13 @@
 #include "ft_args_parser.h"
 #include "ft_ping.h"
 #include "icmp/echo.h"
+#include "libft.h"
 #include "parsing/opts/parser_fn.h"
 #include "routine.h"
 #include "utils/time.h"
 #include "utils/wrapper.h"
 
-static t_args_parser_option_entry g_parser_entries[MAX_PARSER_ENTRIES] = {
+static t_args_parser_option_entry g_parser_entries[] = {
     /* Option valid for all request types */
     {.short_key                     = "c",
      .long_key                      = "count",
@@ -145,21 +146,33 @@ static t_args_parser_config g_args_parser_config = {
     .argc               = 0,
     .argv               = NULL,
     .parser_entries     = g_parser_entries,
-    .nbr_parser_entries = sizeof(g_parser_entries) / sizeof(t_args_parser_option_entry),
+    .parser_entries_len = sizeof(g_parser_entries) / sizeof(g_parser_entries[0]),
     .parse_argument_fn  = parse_arguments,
     .input              = NULL,
-
 };
 
 t_ping_state g_ping_state = RUNNING_SEND_PRELOADING;
 
-void
+static void
 sighandler(int signum) {
     if (signum == SIGALRM) {
         g_ping_state = RUNNING_SEND;
     } else {
         g_ping_state = FINISHING;
     }
+}
+
+static int
+check_arguments_and_options_consistency(const t_ft_ping_options *ft_ping_options) {
+    if (ft_ping_options->interval && ft_ping_options->flood) {
+        ft_error(0, 0, "-f and -i are incompatible options");
+        return (-1);
+    }
+    if (!ft_ping_options->node) {
+        ft_error(0, 0, "missing host operand");
+        return (-1);
+    }
+    return (0);
 }
 
 int
@@ -182,6 +195,9 @@ main(int argc, char **argv) {
     g_args_parser_config.argv  = argv;
 
     if (ft_args_parser(&g_args_parser_config) == -1) {
+        return (1);
+    }
+    if (check_arguments_and_options_consistency(&ft_ping.options) == -1) {
         return (1);
     }
     if (ft_ping_init(&ft_ping) == -1) {

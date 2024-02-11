@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/08 13:24:49 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:04:57 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:34:52 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,17 +50,17 @@ watchdog(t_ft_ping *ft_ping) {
     if (g_ping_state == FINISHING) {
         return (0);
     }
-    if (HAS_OPT(ft_ping, OPT_TIMEOUT)) {
+    if (ft_ping->options.timeout) {
         if (should_be_finished(&ft_ping->start_time, ft_ping->options_value.timeout)) {
             return (0);
         }
     }
-    if (HAS_OPT(ft_ping, OPT_COUNT)) {
+    if (ft_ping->options.count) {
         if (ft_ping->stat.packet_sent >= ft_ping->options_value.count) {
             if (g_ping_state >= RUNNING_SEND) {
                 g_ping_state = RUNNING_RECV;
             }
-            if (HAS_OPT(ft_ping, OPT_LINGER)) {
+            if (ft_ping->options.linger) {
                 if (setsock_recvtimeout(ft_ping->sock_fd, ft_ping->options_value.linger) == -1) {
                     return (-1);
                 }

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/10 18:10:34 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:29:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 19:34:34 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,13 +48,4 @@ sockaddr2str(const struct sockaddr* sockaddr, socklen_t sock_len, t_sockaddr_str
         return (SOCKADDR2STR_ONLY_NUMERIC); /* Fail without printing any error message. */
     }
     return (SOCKADDR2STR_OK);
-}
-
-void
-print_ip_header_dump(struct ip* ip) {
-    printf("IP Hdr Dump:\n");
-    for (size_t i = 0; i < sizeof(*ip); i++) {
-        printf("%02x%s", *((uint8_t*)ip + i), i % 2 != 0 ? " " : "");
-    }
-    printf("\n");
 }

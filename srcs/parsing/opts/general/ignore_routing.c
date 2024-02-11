@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 10:35:32 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 10:35:43 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:24:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_ignore_routing(char *argument, t_args_parser_state *parser_state, void *in
     (void)argument;
     (void)parser_state;
 
-    TOGGLE_OPT(ft_ping, OPT_IGNORE_ROUTING);
+    ft_ping->options.ignore_routing = true;
 
     return (0);
 }

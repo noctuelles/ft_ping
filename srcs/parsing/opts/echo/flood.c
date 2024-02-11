@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 11:09:53 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:10:02 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:19:31 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_flood(char *argument, t_args_parser_state *parser_state, void *input) {
     (void)argument;
     (void)parser_state;
 
-    TOGGLE_OPT(ft_ping, OPT_FLOOD);
+    ft_ping->options.flood = true;
 
     return (0);
 }

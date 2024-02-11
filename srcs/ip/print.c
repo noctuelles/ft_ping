@@ -1,26 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   route.c                                            :+:      :+:    :+:   */
+/*   print.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/28 11:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 20:23:44 by plouvel          ###   ########.fr       */
+/*   Created: 2024/02/11 19:34:25 by plouvel           #+#    #+#             */
+/*   Updated: 2024/02/11 19:35:16 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_args_parser.h"
-#include "ft_ping.h"
-#include "libft.h"
+#include <netinet/ip.h>
+#include <stdio.h>
 
-int
-parse_route(char *argument, t_args_parser_state *parser_state, void *input) {
-    t_ft_ping *ft_ping = (t_ft_ping *)input;
-    (void)argument;
-    (void)parser_state;
-
-    ft_ping->options.route = true;
-
-    return (0);
+void
+print_ip_header_hexdump(struct ip* ip) {
+    printf("IP Hdr Dump:\n");
+    for (size_t i = 0; i < sizeof(*ip); i++) {
+        printf("%02x%s", *((uint8_t*)ip + i), i % 2 != 0 ? " " : "");
+    }
+    printf("\n");
 }
+
+void
+print_ip_header(struct ip* ip)

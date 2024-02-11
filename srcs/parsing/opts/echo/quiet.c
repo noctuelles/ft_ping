@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 11:19:09 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:19:34 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:23:36 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_quiet(char *argument, t_args_parser_state *parser_state, void *input) {
     (void)argument;
     (void)parser_state;
 
-    TOGGLE_OPT(ft_ping, OPT_QUIET);
+    ft_ping->options.quiet = true;
 
     return (0);
 }

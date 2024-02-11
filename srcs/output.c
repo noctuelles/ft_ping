@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 22:05:14 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:01:12 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:36:13 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void
 print_introduction(const t_ft_ping *ft_ping) {
     (void)printf("PING %s (%s): %lu data bytes", ft_ping->node, ft_ping->sockaddr.host_presentation,
                  ft_ping->options_value.packet_data_size);
-    if (HAS_OPT(ft_ping, OPT_VERBOSE)) {
+    if (ft_ping->options.verbose) {
         (void)printf(", id %#04x = %u", ft_ping->icmp.seq.id, ft_ping->icmp.seq.id);
     }
     (void)printf("\n");
@@ -52,10 +52,10 @@ void
 print_icmp_echo_reply(const t_ft_ping *ft_ping, const t_incoming_packet_info *pi, bool duplicate) {
     t_sockaddr_str sockaddr_str;
 
-    if (HAS_OPT(ft_ping, OPT_QUIET)) {
+    if (ft_ping->options.quiet) {
         return;
     }
-    if (HAS_OPT(ft_ping, OPT_FLOOD)) {
+    if (ft_ping->options.flood) {
         printf("\b");
         return;
     }

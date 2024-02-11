@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:56:51 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:03:39 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:37:57 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,34 +22,10 @@
 #include "translation.h"
 #include "utils/net.h"
 
-#define TOGGLE_OPT(ft_ping, option) ((ft_ping)->option_flags ^= option)
-#define HAS_OPT(ft_ping, option) ((ft_ping)->option_flags & (option))
-
 #define CHK_SEQ_NBR(ft_ping, nbr) ((ft_ping)->icmp.seq.nbr_chk[nbr / 8] & (1U << nbr % 8))
 #define SET_SEQ_NBR(ft_ping, nbr) ((ft_ping)->icmp.seq.nbr_chk[nbr / 8] ^= (1U << nbr % 8))
 
-#define U16_PID() (getpid() & 0xFFFFU)
 #define PATTERN_MAX_SIZE 16
-
-#define OPT_COUNT 0x1
-#define OPT_DEBUG 0x2
-#define OPT_INTERVAL 0x4
-#define OPT_NUMERIC 0x8
-#define OPT_IGNORE_ROUTING 0x10
-#define OPT_TIME_TO_LIVE 0x20
-#define OPT_TYPE_OF_SERVICE 0x40
-#define OPT_VERBOSE 0x80
-#define OPT_TIMEOUT 0x100
-#define OPT_LINGER 0x200
-
-#define OPT_FLOOD 0x400
-#define OPT_IP_TIMESTAMP 0x800
-#define OPT_PRELOAD 0x1000
-#define OPT_PATTERN 0x2000
-#define OPT_QUIET 0x4000
-#define OPT_ROUTE 0x8000
-#define OPT_SIZE 0x10000
-#define OPT_HELP 0x20000
 
 #define DEFAULT_PACKET_DATA_SIZE 56
 #define DEFAULT_PRELOAD_NBR_PACKETS 1
@@ -85,19 +61,6 @@ typedef struct s_incoming_packet_info {
                            packet.*/
 } t_incoming_packet_info;
 
-typedef struct s_ft_ping_option_values {
-    size_t   count;
-    uint64_t ms_interval_between_packets;
-    time_t   timeout;
-    time_t   linger;
-    uint64_t packet_time_to_live;
-    uint64_t packet_type_of_service;
-
-    t_data_pattern packet_data_pattern;
-    size_t         packet_data_size;
-    size_t         preload_nbr_packets;
-} t_ft_ping_option_values;
-
 typedef struct s_ft_ping_icmp {
     struct icmp* packet;
     size_t       packet_size;
@@ -108,9 +71,44 @@ typedef struct s_ft_ping_icmp {
     } seq;
 } t_ft_ping_icmp;
 
+typedef struct s_ft_ping_options {
+    bool count : 1;
+    bool debug : 1;
+    bool interval : 1;
+    bool numeric : 1;
+    bool ignore_routing : 1;
+    bool time_to_live : 1;
+    bool type_of_service : 1;
+    bool verbose : 1;
+    bool timeout : 1;
+    bool linger : 1;
+    bool flood : 1;
+    bool ip_timestamp : 1;
+    bool preload : 1;
+    bool pattern : 1;
+    bool quiet : 1;
+    bool route : 1;
+    bool size : 1;
+    bool help : 1;
+    bool node : 1;
+} t_ft_ping_options;
+
+typedef struct s_ft_ping_options_value {
+    size_t   count;
+    uint64_t ms_interval_between_packets;
+    time_t   timeout;
+    time_t   linger;
+    uint64_t packet_time_to_live;
+    uint64_t packet_type_of_service;
+
+    t_data_pattern packet_data_pattern;
+    size_t         packet_data_size;
+    size_t         preload_nbr_packets;
+} t_ft_ping_options_value;
+
 typedef struct s_ft_ping {
-    uint64_t                option_flags;
-    t_ft_ping_option_values options_value;
+    t_ft_ping_options       options;
+    t_ft_ping_options_value options_value;
     struct {
         struct sockaddr host;
         char            host_presentation[INET_ADDRSTRLEN];

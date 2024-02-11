@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 14:40:48 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:09:15 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:18:30 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ parse_pattern(char *argument, t_args_parser_state *parser_state, void *input) {
 
     fill_pattern(argument, data_pattern.pattern);
 
-    TOGGLE_OPT(ft_ping, OPT_PATTERN);
+    ft_ping->options.pattern                   = true;
     ft_ping->options_value.packet_data_pattern = data_pattern;
 
     return (0);

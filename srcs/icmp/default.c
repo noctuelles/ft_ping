@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 11:35:06 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:29:55 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:36:26 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,5 @@ print_icmp_default(const t_incoming_packet_info *pi, bool verbose, bool numeric_
     print_icmp_type_code_str(pi->icmp->icmp_type, pi->icmp->icmp_code);
 
     if (verbose) {
-        print_ip_header_dump(pi->ip);
     }
 }

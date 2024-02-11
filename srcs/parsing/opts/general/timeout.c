@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 14:46:41 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/06 05:04:28 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:25:08 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ parse_timeout(char *argument, t_args_parser_state *parser_state, void *input) {
         return (-1);
     }
 
-    TOGGLE_OPT(ft_ping, OPT_TIMEOUT);
+    ft_ping->options.timeout       = true;
     ft_ping->options_value.timeout = (time_t)ft_atoi(argument);
 
     return (0);

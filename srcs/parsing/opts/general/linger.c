@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 10:25:34 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 10:42:25 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:24:36 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ parse_linger(char *argument, t_args_parser_state *parser_state, void *input) {
         return (-1);
     }
 
-    TOGGLE_OPT(ft_ping, OPT_LINGER);
+    ft_ping->options.linger       = true;
     ft_ping->options_value.linger = (time_t)ft_atoi(argument);
 
     return (0);

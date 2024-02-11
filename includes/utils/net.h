@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 10:53:28 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:27:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 19:35:16 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,6 @@ typedef enum e_sockaddr2str_ret {
 
 t_sockaddr2str_ret sockaddr2str(const struct sockaddr* sockaddr, socklen_t sock_len, t_sockaddr_str* sockaddr_str,
                                 bool numeric_only);
-void               print_ip_header_dump(struct ip* ip);
+void               print_ip_header_hexdump(struct ip* ip);
 
 #endif /* NET_H */

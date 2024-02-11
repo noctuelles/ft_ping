@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 14:45:24 by plouvel           #+#    #+#             */
-/*   Updated: 2024/01/28 11:19:04 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/11 20:23:28 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ parse_preload(char *argument, t_args_parser_state *parser_state, void *input) {
         return (-1);
     }
 
-    TOGGLE_OPT(ft_ping, OPT_PRELOAD);
+    ft_ping->options.preload                   = true;
     ft_ping->options_value.preload_nbr_packets = (size_t)ft_atoi(argument);
 
     return (0);
