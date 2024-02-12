@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 20:30:46 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/12 10:59:41 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,8 @@ static t_args_parser_config g_args_parser_config = {
 
 t_ping_state g_ping_state = RUNNING_SEND_PRELOADING;
 
+extern char *program_invocation_short_name;
+
 static void
 sighandler(int signum) {
     if (signum == SIGALRM) {
@@ -196,6 +198,13 @@ main(int argc, char **argv) {
 
     if (ft_args_parser(&g_args_parser_config) == -1) {
         return (1);
+    }
+    if (ft_ping.options.help) {
+        printf("Usage: %s [OPTION]... HOST\nSend ICMP ECHO_REQUEST packets to network hosts\n\nOptions available :\n\n",
+               program_invocation_short_name);
+        ft_args_parser_print_docs(&g_args_parser_config);
+        printf("\n\nWritten by plouvel (plouvel@student.42.fr)\n");
+        return (0);
     }
     if (check_arguments_and_options_consistency(&ft_ping.options) == -1) {
         return (1);
