@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:00:39 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/13 17:51:10 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/15 00:00:17 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,21 +74,6 @@ recvmsg_w(int sockfd, struct msghdr *msg, int flags) {
         } else {
             return RECVMSGW_INTERRUPT;
         }
-    }
-
-    return ret;
-}
-
-int
-getnameinfo_w(const struct sockaddr *sa, socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen,
-              int flags) {
-    int ret = 0;
-
-    if ((ret = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags)) != 0) {
-        if (ret == EAI_SYSTEM)
-            ft_error(0, errno, "cannot get name info");
-        else
-            ft_error(0, 0, "cannot get name info: %s", gai_strerror(ret));
     }
 
     return ret;
