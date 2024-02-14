@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/08 13:24:49 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/13 11:31:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/14 23:56:43 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,5 +106,5 @@ watchdog(t_ft_ping *ft_ping) {
         g_ping_state = RUNNING_RECV;
     }
 
-    return (true);
+    return (1);
 }

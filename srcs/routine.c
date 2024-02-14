@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/20 23:20:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/14 23:47:11 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/14 23:58:12 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ icmp_error_msg_not_for_us(const struct icmp *icmp_err_msg, const struct sockaddr
     return (false);
 }
 
-static int
+static void
 process_incoming_packet(t_ft_ping *ft_ping, const struct msghdr *msghdr, size_t bytes_recv) {
     char                   ip_str[INET_ADDRSTRLEN] = {0};
     bool                   duplicate               = false;
@@ -68,7 +68,7 @@ process_incoming_packet(t_ft_ping *ft_ping, const struct msghdr *msghdr, size_t 
     ret = icmp_packet_decode((uint8_t *)msghdr->msg_iov[0].iov_base, bytes_recv, &pi.ip, &pi.icmp);
     if (ret == -1) {
         fprintf(stderr, "packet too short (%lu bytes) from %s\n", bytes_recv, ip_str);
-        return (0);
+        return;
     }
     if (ret == 1) {
         fprintf(stderr, "checksum mismatch from %s\n", ip_str);
@@ -79,10 +79,10 @@ process_incoming_packet(t_ft_ping *ft_ping, const struct msghdr *msghdr, size_t 
         case ICMP_ECHO:
         case ICMP_TIMESTAMP:
         case ICMP_ADDRESS:
-            return (-1);
+            return;
         case ICMP_ECHOREPLY:
             if (ntohs(pi.icmp->icmp_hun.ih_idseq.icd_id) != ft_ping->icmp.seq.id) {
-                return (-1);
+                return;
             }
             if (CHK_SEQ_NBR(ft_ping, ntohs(pi.icmp->icmp_hun.ih_idseq.icd_seq))) {
                 duplicate = true;
@@ -109,30 +109,12 @@ process_incoming_packet(t_ft_ping *ft_ping, const struct msghdr *msghdr, size_t 
             break;
         default:
             if (icmp_error_msg_not_for_us(pi.icmp, &ft_ping->sockaddr.host, ft_ping->icmp.seq.id)) {
-                return (-1);
+                return;
             }
             print_icmp_default(&pi, ft_ping->options.verbose, ft_ping->options.numeric);
     }
-    return (-1);
 }
 
-/**
- * @brief Main ping routine.
- * @note
- * There's a global variable that is used to track if the ping routine should continue to run or not : we're using
- * signal handler to globally modify the program state.
- * We'are using the recvmsg timeout blocking ability to send packages at a regular interval (SO_RCVTIMEO).
- *
- * The routine is divided into 3 states:
- * - RUNNING_PRELOAD: We send a burst of packets as fast as possible. Note that we use MSG_DONTWAIT during preloading to
- *   avoid blocking at the recvmsg call.
- * - RUNNING : We send packets at a regular interval.
- * - RUNNING_SEND_DISABLE : We stop sending packets, but we still wait for the remaining packets to be received. This
- *   state is usefull when the user specified the --count option.
- *
- * @param ft_ping pointer to the ping structure.
- * @return int -1 on error, 0 on success.
- */
 static ssize_t
 ft_ping_main_loop(t_ft_ping *ft_ping) {
     struct msghdr      msg                       = {0};
@@ -155,8 +137,7 @@ ft_ping_main_loop(t_ft_ping *ft_ping) {
             } else if (ret == RECVMSGW_TIMEOUT) {
                 g_ping_state = FINISHING;
             } else if (ret > 0) {
-                if (process_incoming_packet(ft_ping, &msg, ret) == 0) {
-                }
+                process_incoming_packet(ft_ping, &msg, ret);
             }
         }
         ret = 0;
