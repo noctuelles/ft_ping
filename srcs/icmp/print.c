@@ -1,24 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   output.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/17 16:15:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 19:03:50 by plouvel          ###   ########.fr       */
+/*   Created: 2024/02/14 22:55:26 by plouvel           #+#    #+#             */
+/*   Updated: 2024/02/14 23:39:55 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ip/print.h"
+
+#include <arpa/inet.h>
+#include <limits.h>
 #include <netinet/ip_icmp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include "ft_ping.h"
-#include "libft.h"
-#include "utils/wrapper.h"
 
 struct s_icmp_diagnostic {
     uint8_t type;     /* Type code */
@@ -69,72 +69,11 @@ static struct s_icmp_diagnostic_code g_icmp_diagnostic_code[] = {
     {ICMP_REDIRECT, ICMP_REDIR_HOST, "Redirect Datagram for the Host"},
     {ICMP_REDIRECT, ICMP_REDIR_NETTOS, "Redirect Datagram for the Type of Service and Network"},
     {ICMP_REDIRECT, ICMP_REDIR_HOSTTOS, "Redirect Datagram for the Type of Service and Host"},
-    {ICMP_TIME_EXCEEDED, ICMP_EXC_TTL, "Time to Live Exceeded in Transit"},
+    {ICMP_TIME_EXCEEDED, ICMP_EXC_TTL, "Time to Live Exceeded"},
     {ICMP_TIME_EXCEEDED, ICMP_EXC_FRAGTIME, "Fragment Reassembly Time Exceeded"},
 };
 
 #define NITEMS(x) (sizeof(x) / sizeof(x[0]))
-
-/**
- * @brief compute the internet checksum of a payload for an ICMPv4 packet (ICMPv6 is computed by the kernel)
- * @note see https://tools.ietf.org/html/rfc1071
- *
- * @param payload pointer to the payload
- * @param payload_size size of the payload
- * @return uint16_t the checksum
- */
-uint16_t
-icmp_checksum(void *payload, size_t payload_size) {
-    uint32_t  checksum = 0;
-    uint16_t *ptr      = (uint16_t *)payload;
-
-    payload_size /= sizeof(uint16_t);
-
-    for (size_t i = 0; i < payload_size; i++) {
-        checksum += ptr[i];
-        checksum = (checksum & 0xffff) + (checksum >> 16);
-    }
-
-    return (uint16_t)(~checksum & 0xffff);
-}
-
-/**
- * @brief Decode an incoming IP datagram returned by the kernel. If successfull, the packet info pi is
- * updated.
- *
- * @param buffer pointer to buffer returned by the kernel.
- * @param buffer_size buffer size returned by the kernel.
- * @param pi pointer to the packet info.
- * @return int 0: the function sucessfully parsed the datagram. -1 : the packet is too short (fatal error), 1 : the
- * checksum doesn't match.
- */
-int
-icmp_packet_decode(uint8_t *buffer, size_t buffer_size, t_incoming_packet_info *pi) {
-    struct ip   *ip               = NULL;
-    struct icmp *icmp             = NULL;
-    size_t       ip_header_len    = 0;
-    size_t       icmp_payload_len = 0;
-    uint16_t     saved_cksum      = 0;
-
-    ip                   = (struct ip *)buffer;
-    pi->ip               = ip;
-    ip_header_len        = ip->ip_hl << 2U;
-    icmp_payload_len     = ntohs(ip->ip_len) - ip_header_len;
-    pi->icmp_payload_len = icmp_payload_len;
-    if (buffer_size < ip_header_len + ICMP_MINLEN) {
-        return (-1);
-    }
-    icmp             = (struct icmp *)(buffer + ip_header_len);
-    pi->icmp         = icmp;
-    saved_cksum      = icmp->icmp_cksum;
-    icmp->icmp_cksum = 0;
-    icmp->icmp_cksum = icmp_checksum(icmp, icmp_payload_len);
-    if (icmp->icmp_cksum != saved_cksum) {
-        return (1);
-    }
-    icmp->icmp_cksum = saved_cksum;
-    return (0);
-}
 
 static void
 print_icmp_code(uint8_t type, uint8_t code, char *prefix) {
@@ -148,7 +87,7 @@ print_icmp_code(uint8_t type, uint8_t code, char *prefix) {
     printf("%s, Bad icmp code : %u\n", prefix, code);
 }
 
-void
+static void
 print_icmp_type_code_str(uint8_t type, uint8_t code) {
     for (size_t i = 0; i < NITEMS(g_icmp_diagnostics); i++) {
         if (g_icmp_diagnostics[i].type == type) {
@@ -161,4 +100,63 @@ print_icmp_type_code_str(uint8_t type, uint8_t code) {
         }
     }
     printf("Bad icmp type : %u\n", type);
+}
+
+static void
+print_icmp_header_details(const struct icmp *icmp) {
+    const struct ip   *orig_ip_packet   = NULL;
+    const struct icmp *orig_icmp_packet = NULL;
+
+    orig_ip_packet   = (const struct ip *)icmp->icmp_dun.id_data;
+    orig_icmp_packet = (const struct icmp *)(icmp->icmp_dun.id_data + (orig_ip_packet->ip_hl << 2));
+
+    printf("ICMP: type %u, code %u, size %u, id 0x%04x, seq 0x%04x\n", orig_icmp_packet->icmp_type,
+           orig_icmp_packet->icmp_code, ntohs(orig_ip_packet->ip_len) - (orig_ip_packet->ip_hl << 2),
+           ntohs(orig_icmp_packet->icmp_hun.ih_idseq.icd_id), ntohs(orig_icmp_packet->icmp_hun.ih_idseq.icd_seq));
+}
+
+void
+print_icmp_default(const t_incoming_packet_info *pi, bool verbose, bool numeric_only) {
+    char ip_str[INET_ADDRSTRLEN]                     = {0};
+    char hostname_str[HOST_NAME_MAX]                 = {0};
+    char buffer[INET_ADDRSTRLEN + HOST_NAME_MAX + 4] = {0}; /* + 4 : a pair of parenthesis space, NUL terminator */
+    bool hostname_resolved                           = false;
+
+    (void)inet_ntop(AF_INET, &pi->from_sa->sin_addr, ip_str, INET_ADDRSTRLEN);
+    if (!numeric_only) {
+        hostname_resolved = getnameinfo((const struct sockaddr *)pi->from_sa, sizeof(*pi->from_sa), hostname_str,
+                                        HOST_NAME_MAX, NULL, 0, NI_NAMEREQD) == 0;
+    }
+    if (hostname_resolved) {
+        snprintf(buffer, sizeof(buffer), "%s (%s)", hostname_str, ip_str);
+    } else {
+        snprintf(buffer, sizeof(buffer), "%s", ip_str);
+    }
+    printf("%u bytes from %s: ", pi->icmp_size, buffer);
+    print_icmp_type_code_str(pi->icmp->icmp_type, pi->icmp->icmp_code);
+    if (verbose) {
+        print_ip_header_hexdump(pi->ip);
+        print_ip_header(pi->ip);
+        print_icmp_header_details(pi->icmp);
+    }
+}
+
+void
+print_icmp_echo_reply(const t_ft_ping *ft_ping, const t_incoming_packet_info *pi, bool duplicate) {
+    if (ft_ping->options.quiet) {
+        return;
+    }
+    if (ft_ping->options.flood) {
+        printf("\b");
+        return;
+    }
+    printf("%u bytes from %s: icmp_seq=%u ttl=%u", pi->icmp_size, inet_ntoa(pi->from_sa->sin_addr),
+           ntohs(pi->icmp->icmp_hun.ih_idseq.icd_seq), pi->ip->ip_ttl);
+    if (pi->icmp_size - ICMP_MINLEN >= (uint16_t)sizeof(struct timespec)) {
+        printf(" time=%.3f ms", ft_ping->stat.last_packet_rtt);
+    }
+    if (duplicate) {
+        printf(" (DUP!)");
+    }
+    printf("\n");
 }

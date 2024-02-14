@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/28 11:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 20:23:44 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/13 01:11:41 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ parse_route(char *argument, t_args_parser_state *parser_state, void *input) {
     (void)argument;
     (void)parser_state;
 
-    ft_ping->options.route = true;
+    ft_ping->options.ignore_routing = true;
 
     return (0);
 }

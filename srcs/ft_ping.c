@@ -6,22 +6,26 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 09:19:44 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 20:34:12 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/14 23:17:20 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ping.h"
 
 #include <arpa/inet.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "utils/time.h"
+#include "ft_args_parser.h"
 #include "utils/wrapper.h"
 
+void print_intro(const t_ft_ping *ft_ping);
+void print_outro(const t_ft_ping *ft_ping);
 static int
 ft_ping_init_setsockopt(int sock_fd, const t_ft_ping_options *ft_ping_options,
                         const t_ft_ping_options_value *ft_ping_options_value) {
@@ -42,7 +46,7 @@ ft_ping_init_setsockopt(int sock_fd, const t_ft_ping_options *ft_ping_options,
             return (-1);
         }
     }
-    if (ft_ping_options->route) {
+    if (ft_ping_options->ignore_routing) {
         dont_route = 1;
         if (setsockopt_w(sock_fd, SOL_SOCKET, SO_DONTROUTE, &dont_route, sizeof(dont_route)) == -1) {
             return (-1);
@@ -107,4 +111,33 @@ ft_ping_init(t_ft_ping *ft_ping) {
 error:
     ft_ping_clean(ft_ping);
     return (-1);
+}
+
+void
+ft_ping_print_intro(const t_ft_ping *ft_ping) {
+    (void)printf("PING %s (%s): %lu data bytes", ft_ping->node, ft_ping->sockaddr.host_presentation,
+                 ft_ping->options_value.packet_data_size);
+    if (ft_ping->options.verbose) {
+        (void)printf(", id %#04x = %u", ft_ping->icmp.seq.id, ft_ping->icmp.seq.id);
+    }
+    (void)printf("\n");
+}
+
+void
+ft_ping_print_outro(const t_ft_ping *ft_ping) {
+    (void)printf("--- %s ping statistics ---\n", ft_ping->node);
+
+    (void)printf("%lu packets transmitted, %lu received", ft_ping->stat.packet_sent, ft_ping->stat.packet_received);
+    if (ft_ping->stat.packet_duplicate != 0) {
+        (void)printf(", +%lu duplicates", ft_ping->stat.packet_duplicate);
+    }
+    (void)printf(", %lu%% packet loss",
+                 (ft_ping->stat.packet_sent - ft_ping->stat.packet_received) * 100 / ft_ping->stat.packet_sent);
+    (void)printf("\n");
+
+    if (ft_ping->stat.last_packet_rtt != 0.0) {
+        (void)printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", ft_ping->stat.min_packet_rtt,
+                     ft_ping->stat.avg_packet_rtt / (double)ft_ping->stat.packet_received, ft_ping->stat.max_packet_rtt,
+                     0.0f);
+    }
 }

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 06:04:38 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/10 10:37:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/14 23:28:49 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include <time.h>
 
 #include "ft_ping.h"
-#include "icmp/utils.h"
-#include "utils/wrapper.h"
 
 /**
  * @brief Fill the header section of an ICMP Echo Request.
@@ -39,19 +37,21 @@ fill_icmp_echo_packet_header(struct icmphdr *icmp_echo_packet_header, uint16_t s
  *
  * @param icmp_echo_packet_data pointer to the data section of the packet.
  * @param data_pattern a data pattern defined by the user through the --pattern option.
- * @param packet_data_length the length of the data section of the packet.
+ * @param packet_data_size the size of the data section of the packet.
  */
 void
-fill_icmp_echo_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern *data_pattern,
-                           size_t packet_data_length) {
-    if (packet_data_length >= sizeof(struct timespec)) {
+fill_icmp_echo_request_packet_data(uint8_t *icmp_echo_packet_data, const t_data_pattern *data_pattern,
+                                   size_t packet_data_size) {
+    const size_t sizeof_timespec = sizeof(struct timespec);
+
+    if (packet_data_size >= sizeof_timespec) {
         (void)clock_gettime(CLOCK_MONOTONIC, (struct timespec *)icmp_echo_packet_data);
 
-        icmp_echo_packet_data += sizeof(struct timespec);
-        packet_data_length -= sizeof(struct timespec);
+        icmp_echo_packet_data += sizeof_timespec;
+        packet_data_size -= sizeof_timespec;
     }
 
-    for (size_t i = 0; i < packet_data_length; i++) {
+    for (size_t i = 0; i < packet_data_size; i++) {
         if (data_pattern->pattern_size > 0) {
             icmp_echo_packet_data[i] = data_pattern->pattern[i % data_pattern->pattern_size];
         } else {

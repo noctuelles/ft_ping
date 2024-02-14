@@ -1,20 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   default.h                                          :+:      :+:    :+:   */
+/*   common.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/11 11:47:32 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 11:48:08 by plouvel          ###   ########.fr       */
+/*   Created: 2024/02/01 06:15:08 by plouvel           #+#    #+#             */
+/*   Updated: 2024/02/14 23:14:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ICMP_DEFAULT_H
-#define ICMP_DEFAULT_H
+#ifndef ICMP_COMMON_H
+#define ICMP_COMMON_H
 
 #include "ft_ping.h"
 
-void print_icmp_default(const t_incoming_packet_info *pi, bool verbose, bool numeric_only);
+int      icmp_packet_decode(const uint8_t *buffer, size_t buffer_size, struct ip **p_ip, struct icmp **p_icmp);
+uint16_t icmp_checksum(void *payload, size_t payload_size);
 
-#endif /* ICMP_DEFAULT_H */
+#endif /* ICMP_COMMON_H*/

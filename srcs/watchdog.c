@@ -6,15 +6,16 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/08 13:24:49 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/11 20:34:52 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/13 11:31:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <time.h>
 
 #include "ft_ping.h"
+#include "icmp/common.h"
 #include "icmp/echo.h"
-#include "icmp/utils.h"
+#include "libft.h"
 #include "utils/wrapper.h"
 
 static int
@@ -73,15 +74,21 @@ watchdog(t_ft_ping *ft_ping) {
     if (g_ping_state >= RUNNING_SEND) {
         fill_icmp_echo_packet_header((struct icmphdr *)ft_ping->icmp.packet, ft_ping->icmp.seq.nbr,
                                      ft_ping->icmp.seq.id);
-        fill_icmp_echo_packet_data(ft_ping->icmp.packet->icmp_dun.id_data, &ft_ping->options_value.packet_data_pattern,
-                                   ft_ping->options_value.packet_data_size);
+        fill_icmp_echo_request_packet_data(ft_ping->icmp.packet->icmp_dun.id_data,
+                                           &ft_ping->options_value.packet_data_pattern,
+                                           ft_ping->options_value.packet_data_size);
         ft_ping->icmp.packet->icmp_cksum = icmp_checksum(ft_ping->icmp.packet, ft_ping->icmp.packet_size);
 
-        if (sendto_w(ft_ping->sock_fd, ft_ping->icmp.packet, ft_ping->icmp.packet_size, 0, &ft_ping->sockaddr.host,
-                     ft_ping->sockaddr.len) == -1) {
+        if (sendto_w(ft_ping->sock_fd, ft_ping->icmp.packet, ft_ping->icmp.packet_size, 0,
+                     (struct sockaddr *)&ft_ping->sockaddr.host, ft_ping->sockaddr.len) == -1) {
             return (-1);
+        }
+
+        ft_ping->stat.packet_sent++;
+        if (ft_ping->icmp.seq.nbr == UINT16_MAX) {
+            ft_memset(ft_ping->icmp.seq.nbr_chk, 0, sizeof(ft_ping->icmp.seq.nbr_chk));
+            ft_ping->icmp.seq.nbr = 0;
         } else {
-            ft_ping->stat.packet_sent++;
             ft_ping->icmp.seq.nbr++;
         }
 

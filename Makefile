@@ -16,7 +16,6 @@ SRCS=\
 		parsing/opts/general/verbose.c \
 		parsing/opts/echo/data_pattern.c \
 		parsing/opts/echo/flood.c \
-		parsing/opts/echo/ip_timestamp.c \
 		parsing/opts/echo/preload.c \
 		parsing/opts/echo/quiet.c \
 		parsing/opts/echo/route.c \
@@ -25,15 +24,14 @@ SRCS=\
 		parsing/opts/help.c \
 		utils/wrapper.c \
 		utils/time.c \
-		utils/net.c \
 		icmp/echo.c \
-		icmp/utils.c \
-		icmp/default.c \
+		icmp/print.c \
+		icmp/common.c \
+		ip/print.c \
 		ft_ping.c\
 		main.c  \
 		watchdog.c \
 		routine.c \
-		output.c \
 		translation.c
 
 LIBFT=$(LIBFT_DIR)/libft.a

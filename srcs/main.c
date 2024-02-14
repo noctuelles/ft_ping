@@ -6,28 +6,19 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 10:28:19 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/12 10:59:41 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/02/14 19:33:52 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <arpa/inet.h>
-#include <errno.h>
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "ft_args_parser.h"
 #include "ft_ping.h"
-#include "icmp/echo.h"
 #include "libft.h"
 #include "parsing/opts/parser_fn.h"
 #include "routine.h"
-#include "utils/time.h"
-#include "utils/wrapper.h"
 
 static t_args_parser_option_entry g_parser_entries[] = {
     /* Option valid for all request types */
@@ -117,7 +108,7 @@ static t_args_parser_option_entry g_parser_entries[] = {
      .argument                      = false,
      .long_key_argument_description = NULL,
      .parse_fn                      = parse_flood,
-     .description = "send NUMBER packets as fast as possible before falling into normal mode of behavior"},
+     .description                   = "flood ping"},
 
     {.short_key                     = "?",
      .long_key                      = "help",
@@ -200,10 +191,11 @@ main(int argc, char **argv) {
         return (1);
     }
     if (ft_ping.options.help) {
-        printf("Usage: %s [OPTION]... HOST\nSend ICMP ECHO_REQUEST packets to network hosts\n\nOptions available :\n\n",
-               program_invocation_short_name);
+        (void)printf(
+            "Usage: %s HOST [OPTION]...\nSend ICMP ECHO_REQUEST packets to network hosts\n\nOptions available :\n\n",
+            program_invocation_short_name);
         ft_args_parser_print_docs(&g_args_parser_config);
-        printf("\n\nWritten by plouvel (plouvel@student.42.fr)\n");
+        (void)printf("\n\nWritten by plouvel (plouvel@student.42.fr).\n");
         return (0);
     }
     if (check_arguments_and_options_consistency(&ft_ping.options) == -1) {

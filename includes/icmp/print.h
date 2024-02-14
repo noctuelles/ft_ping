@@ -1,26 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ip_timestamp.c                                     :+:      :+:    :+:   */
+/*   print.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/28 11:10:17 by plouvel           #+#    #+#             */
-/*   Updated: 2024/02/12 10:51:06 by plouvel          ###   ########.fr       */
+/*   Created: 2024/02/14 23:03:38 by plouvel           #+#    #+#             */
+/*   Updated: 2024/02/14 23:12:50 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_args_parser.h"
+#ifndef FT_PING_PRINT_H
+#define FT_PING_PRINT_H
+
 #include "ft_ping.h"
-#include "libft.h"
 
-int
-parse_ip_timestamp(char *argument, t_args_parser_state *parser_state, void *input) {
-    t_ft_ping *ft_ping = (t_ft_ping *)input;
-    (void)argument;
-    (void)parser_state;
+void print_icmp_default(const t_incoming_packet_info *pi, bool verbose, bool numeric_only);
+void print_icmp_echo_reply(const t_ft_ping *ft_ping, const t_incoming_packet_info *pi, bool duplicate);
 
-    ft_ping->options.ip_timestamp = true;
-
-    return (0);
-}
+#endif  // FT_PING_PRINT_H
